@@ -30,6 +30,10 @@ venv/
 log.lammps
 slurm-*.out
 
+# The trimmed frames the tests read are committed
+!tests/data/**/*.lammpstrj.gz
+!tests/data/**/*.data.gz
+
 # Figures are regenerated
 *.png
 *.pdf

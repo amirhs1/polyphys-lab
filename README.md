@@ -36,7 +36,10 @@ polyphys-lab/
       notebooks/        the study's notebooks
       runs/manifest.csv one row per run name
   notebooks/            plot settings and notebooks shared by the studies
-  tests/                checks of the repository's own layout
+  tests/                the layout checks and the cross-study spec checks
+    probe/, analyze/,   the studies' specs run on real frames, and the
+    viz/                comparisons with the research code's output
+    data/probe/         trimmed real frames of 22 wholes of the four studies
 ```
 
 A stage in `pipeline/` takes the study as an argument and reads the study's
@@ -61,6 +64,11 @@ python -m flake8 polyphys_lab projects tests tools
 python tools/typecheck.py
 git ls-files '*.sh' | xargs shellcheck
 ```
+
+The tests marked `private_data` compare with the maintainer's processed
+data and run only when `POLYPHYS_DATA_DIR` names its folder; they are
+skipped otherwise. A CI job also runs the tests against PolyPhys `main`,
+without blocking a merge.
 
 ## Running on a cluster
 
