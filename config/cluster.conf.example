@@ -1,0 +1,37 @@
+# Site settings for the pipeline.
+#
+# Copy this file to `cluster.conf` in the same folder and fill it in:
+#
+#     cp cluster.conf.example cluster.conf
+#
+# `cluster.conf` is ignored by git and must never be committed. It is the
+# one place where account names, addresses, and storage paths live. A
+# stage that needs a value sources it and fails with a clear message when
+# the file or the value is missing.
+
+# --- SLURM identity ---------------------------------------------------
+# No job script carries `#SBATCH --account=` or `--mail-user=`.
+# Preferred: export SBATCH_ACCOUNT in your shell profile on the cluster;
+# sbatch reads it as the default account. With no --mail-user, SLURM
+# notifies the submitting user.
+#
+# Set the two values below only if you submit through a wrapper that
+# passes them on the command line.
+SLURM_ACCOUNT=""
+SLURM_MAIL_USER=""
+
+# --- Storage ----------------------------------------------------------
+# Where the simulations run and where finished data is kept.
+SCRATCH_DIR="${HOME}/scratch"
+PROJECT_DIR="${HOME}/CHANGE_ME"
+
+# --- Software ---------------------------------------------------------
+# The Python environment that has `polyphys_lab` installed, and the
+# modules a LAMMPS job loads. Leave empty to use what is already active.
+LAB_PYTHON_ENV=""
+LAMMPS_MODULES=""
+
+# --- This repository --------------------------------------------------
+# Where polyphys-lab is cloned on the cluster. A study kept in another
+# repository finds the stages of pipeline/ through it.
+LAB_DIR="${HOME}/polyphys-lab"

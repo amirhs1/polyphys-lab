@@ -1,0 +1,39 @@
+[build-system]
+    requires = ["setuptools>=77.0.3"]
+    build-backend = "setuptools.build_meta"
+
+[project]
+    name = "polyphys-lab"
+    version = "0.0.0"
+    description = "Study records and the cluster pipeline for PolyPhys."
+    readme = "README.md"
+    requires-python = ">=3.11"
+    # The lab pins one released PolyPhys; raise the pin deliberately.
+    dependencies = [
+        "polyphys[mda,viz]==1.0.0"
+    ]
+    classifiers = [
+        "Private :: Do Not Upload"
+    ]
+
+[project.optional-dependencies]
+    dev = [
+        "pytest",
+        "flake8",
+        "mypy"
+    ]
+
+# Each study's python/ folder is one subpackage of polyphys_lab. Adding a
+# study means adding one line to `packages` and one to `package-dir`:
+#
+#     packages = ["polyphys_lab", "polyphys_lab.<study>"]
+#     "polyphys_lab.<study>" = "projects/<study>/python"
+[tool.setuptools]
+    packages = ["polyphys_lab"]
+
+[tool.setuptools.package-dir]
+    "polyphys_lab" = "polyphys_lab"
+
+[tool.pytest.ini_options]
+    addopts = "-ra --strict-markers --strict-config --import-mode=importlib"
+    testpaths = ["tests", "projects"]

@@ -1,0 +1,46 @@
+# Site settings: never committed
+config/cluster.conf
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+.coverage
+.venv
+venv/
+
+# Jupyter
+.ipynb_checkpoints
+
+# Simulation output and processed data: never committed
+*.lammpstrj
+*.lammpstrj.gz
+*.restart
+*.restart.*
+*.bin
+*.npy
+*.npz
+*.parquet
+*.h5
+log.lammps
+slurm-*.out
+
+# Figures are regenerated
+*.png
+*.pdf
+*.eps
+
+# Editors, operating system
+.vscode/
+.idea/
+.DS_Store
+
+# Agent files: local only
+CLAUDE.local.md
+AGENTS.local.md
+.claude/settings.local.json
+.claude/worktrees/
