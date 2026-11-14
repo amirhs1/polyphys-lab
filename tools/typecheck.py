@@ -5,8 +5,11 @@ Each study's ``projects/<study>/python/`` folder installs as
 ``pyproject.toml``. An editable install provides that mapping with an
 import hook, which mypy does not follow, and by path every study's folder
 is a module named ``python``. So this script links the folders into a
-temporary ``polyphys_lab`` tree and runs mypy on it and on ``tests/``,
-with the settings of ``[tool.mypy]`` in ``pyproject.toml``.
+temporary ``polyphys_lab`` tree and runs mypy on it, on the test modules
+at the top of ``tests/``, and on ``tools/``, with the settings of
+``[tool.mypy]`` in ``pyproject.toml``. The real-frame tests in the
+subfolders of ``tests/`` and their fixtures are not annotated, and are
+not checked.
 
 Run it from the repository root: ``python tools/typecheck.py``. Extra
 arguments are passed to mypy. The exit code is mypy's.
@@ -56,7 +59,9 @@ def main(argv: list[str]) -> int:
         command = [
             sys.executable, "-m", "mypy",
             "--config-file", str(ROOT / "pyproject.toml"),
-            str(package), str(ROOT / "tests"), str(ROOT / "tools"),
+            str(package), *sorted(str(path) for path in
+                                  (ROOT / "tests").glob("*.py")),
+            str(ROOT / "tools"),
             *argv,
         ]
         env = {**os.environ, "MYPYPATH": tmp}
