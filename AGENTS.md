@@ -2,7 +2,7 @@
 
 polyphys-lab holds the study records and the cluster pipeline that go with
 PolyPhys (`amirhs1/PolyPhys`): LAMMPS input templates, SLURM jobs, each
-study's parser and specs, and figure notebooks. Its numbers end up in
+study's parser and specs, and notebooks. Its numbers end up in
 published work.
 
 ## Commands
@@ -15,7 +15,8 @@ when that file exists; it is gitignored and never committed.
 | ------------- | -------------------------------------------------- |
 | Install       | `python -m pip install -e '.[dev]'`                |
 | Run all tests | `python -m pytest`                                 |
-| Lint Python   | `python -m flake8 polyphys_lab projects tests`     |
+| Lint Python   | `python -m flake8 polyphys_lab projects tests tools`     |
+| Type-check    | `python tools/typecheck.py`                        |
 | Lint shell    | `git ls-files '*.sh' \| xargs shellcheck`          |
 | Shell tests   | `bash pipeline/tests/run_tests.sh`, once it exists |
 

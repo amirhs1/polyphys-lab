@@ -19,8 +19,11 @@
 [project.optional-dependencies]
     dev = [
         "pytest",
+        "hypothesis",
         "flake8",
-        "mypy"
+        "mypy",
+        "pandas-stubs",
+        "scipy-stubs"
     ]
 
 # Each study's python/ folder is one subpackage of polyphys_lab. Adding a
@@ -29,11 +32,37 @@
 #     packages = ["polyphys_lab", "polyphys_lab.<study>"]
 #     "polyphys_lab.<study>" = "projects/<study>/python"
 [tool.setuptools]
-    packages = ["polyphys_lab"]
+    packages = [
+        "polyphys_lab",
+        "polyphys_lab.trans_foci_cyl",
+        "polyphys_lab.trans_foci_cub",
+        "polyphys_lab.hns_cub",
+        "polyphys_lab.hns_cyl",
+    ]
 
 [tool.setuptools.package-dir]
     "polyphys_lab" = "polyphys_lab"
+    "polyphys_lab.trans_foci_cyl" = "projects/trans_foci_cyl/python"
+    "polyphys_lab.trans_foci_cub" = "projects/trans_foci_cub/python"
+    "polyphys_lab.hns_cub" = "projects/hns_cub/python"
+    "polyphys_lab.hns_cyl" = "projects/hns_cyl/python"
 
 [tool.pytest.ini_options]
     addopts = "-ra --strict-markers --strict-config --import-mode=importlib"
     testpaths = ["tests", "projects"]
+
+# Run mypy through tools/typecheck.py, which maps each study's python/
+# folder to its package name.
+[tool.mypy]
+    strict = true
+
+[[tool.mypy.overrides]]
+    # polyphys 1.0.0 ships no py.typed marker, so mypy skips it by default;
+    # its sources are fully annotated, so analyze them anyway.
+    module = ["polyphys", "polyphys.*"]
+    follow_untyped_imports = true
+
+[[tool.mypy.overrides]]
+    # MDAnalysis ships no py.typed marker and no stubs, so its names are Any.
+    module = ["MDAnalysis", "MDAnalysis.*"]
+    ignore_missing_imports = true
