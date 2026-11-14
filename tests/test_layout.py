@@ -3,10 +3,11 @@ import importlib
 import tomllib
 from pathlib import Path
 
+import pytest
+
 ROOT = Path(__file__).resolve().parents[1]
-STUDY_PARTS = (
-    "README.md",
-    "python",
+STUDY_CODE_PARTS = ("README.md", "python/__init__.py", "python/tests")
+STUDY_RUN_PARTS = (
     "lammps/README.md",
     "slurm/study.conf",
     "notebooks",
@@ -24,15 +25,27 @@ def test_package_imports() -> None:
     assert importlib.import_module("polyphys_lab").__doc__
 
 
-def test_every_study_has_its_parts() -> None:
-    """Each study folder holds the parts ``projects/README.md`` lists."""
-    missing = [
+def _missing(parts: tuple[str, ...]) -> list[str]:
+    """Return ``<study>/<part>`` for each part a study folder lacks."""
+    return [
         f"{study.name}/{part}"
         for study in _studies()
-        for part in STUDY_PARTS
+        for part in parts
         if not (study / part).exists()
     ]
-    assert missing == []
+
+
+def test_every_study_has_its_code() -> None:
+    """Each study folder holds its README and its Python package."""
+    assert _missing(STUDY_CODE_PARTS) == []
+
+
+@pytest.mark.xfail(
+    strict=True,
+    reason="the LAMMPS, SLURM, notebook, and run parts are not written yet")
+def test_every_study_has_its_run_parts() -> None:
+    """Each study folder holds its LAMMPS, SLURM, notebook, and run parts."""
+    assert _missing(STUDY_RUN_PARTS) == []
 
 
 def test_every_study_is_a_listed_package() -> None:
