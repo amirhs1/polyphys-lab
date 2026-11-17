@@ -4,21 +4,25 @@ One folder per study. "Project" and "study" name the same thing.
 
 ```text
 <study>/
-  README.md         the paper, the state points, and what ran where
+  README.md         the paper, the runs, and the LAMMPS inputs
   python/           parser.py, spec.py, driver.py, corrections.py, tests/
-  lammps/           README.md, input templates, restart/, start/
-  slurm/            study.conf and thin wrappers that call pipeline/
+  lammps/           one folder per variant, and start/
+  slurm/            thin wrappers that call pipeline/
   notebooks/        the study's notebooks
-  runs/manifest.csv one row per run name
+  runs/manifest.csv one row per run
 ```
 
 - `python/` installs as `polyphys_lab.<study>`; `pyproject.toml` lists it.
-- `lammps/README.md` says what each template simulates and how its
-  variants differ. `lammps/start/` holds the start configuration and the
-  script that builds it.
-- `slurm/study.conf` holds the sweep values and the resource table that
-  the stages in `pipeline/` read.
-- `runs/manifest.csv` lists every run of the study by name.
+- `README.md` is the study's one README; it also says what the LAMMPS
+  inputs simulate.
+- `lammps/<variant>/` holds the inputs of one set of runs, each of them
+  one whole file with no `include`, and the variant's `study.conf`: its
+  LAMMPS version and modules, its sweep, and the resource table that the
+  stages in `pipeline/` read. A study whose runs all share their physics
+  and numerics has one variant.
+- `lammps/start/` holds the start configuration and the script that
+  builds it.
+- `runs/manifest.csv` lists every run of the study by variant and name.
 
 `tests/test_layout.py` checks that every study folder has these parts.
 

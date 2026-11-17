@@ -11,10 +11,10 @@ Not recorded yet.
 | Part                | Holds                                                     | State           |
 | ------------------- | --------------------------------------------------------- | --------------- |
 | `python/`           | `parser.py` (the `HnsCyl` parser), `spec.py` (`SPEC`, `PROBE`, `ANALYSIS`), `tests/` | written         |
-| `lammps/`           | input templates, restart inputs, start configuration      | not written yet |
-| `slurm/`            | `study.conf` and the wrappers that call `pipeline/`       | not written yet |
+| `lammps/`           | one folder per variant, with its inputs and `study.conf`; the start configuration | not written yet |
+| `slurm/`            | the wrappers that call `pipeline/`                        | not written yet |
 | `notebooks/`        | the notebooks                                             | not written yet |
-| `runs/manifest.csv` | one row per run name                                      | not written yet |
+| `runs/manifest.csv` | one row per run                                           | not written yet |
 
 The package imports as `polyphys_lab.hns_cyl`:
 
