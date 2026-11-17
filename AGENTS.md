@@ -29,11 +29,11 @@ explicit approval.
 The README's "Layout" section is the map. Two rules hold it together:
 
 - `pipeline/` is general. No study name, state point, or study-specific
-  value appears in it. A stage takes the study as an argument and reads
-  `projects/<study>/slurm/study.conf`.
+  value appears in it. A stage takes the study and the variant as
+  arguments and reads `projects/<study>/lammps/<variant>/study.conf`.
 - `projects/<study>/` holds everything specific to one study, in four
   parts by language (`python/`, `lammps/`, `slurm/`, `notebooks/`) plus
-  `README.md` and `runs/manifest.csv`.
+  one `README.md` and `runs/manifest.csv`.
 
 `projects/<study>/python/` installs as `polyphys_lab.<study>`. Adding a
 study means adding its package and its folder to `pyproject.toml`.
@@ -43,10 +43,13 @@ study means adding its package and its folder to `pyproject.toml`.
 - **The dependency points one way.** This repository pins a released
   `polyphys` in `pyproject.toml`. Never copy PolyPhys code here, and never
   make PolyPhys import from here.
-- **Templates, not run folders.** A study has one template per input,
-  with a variant only where the physics or the numerics differ. Each
-  `lammps/` folder has a `README.md` that says what each template
-  simulates and how the variants differ.
+- **Templates, not run folders.** A study's `lammps/` has one folder per
+  variant: a set of runs with the same physics and numerics. The folder
+  holds the variant's inputs, each of them one whole file with no
+  `include`, and its `study.conf`. A value that is the same for every run
+  of the variant is written in the inputs; only a run's sweep row comes
+  from `study.conf`. The start configuration, in `lammps/start/`, is
+  shared. The study's `README.md` says what the inputs simulate.
 - **Describe files as they stand.** Do not write where a file came from
   or what it replaced.
 - **Only published studies.** Name no unpublished study, in a file, a

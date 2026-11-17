@@ -1,0 +1,72 @@
+# TransFociCub, variant wca: finish an interrupted production run from one of
+# its restart files. The restart file brings back the atoms, the box, the
+# groups, the pair style with its coefficients and pair_modify settings, the
+# communication settings, and the timestep size; the neighbor lists and the
+# fixes are set again here.
+#
+# The run's folder holds this file as input.lmp. The restart stage writes the
+# run's variables at its top, as for production.lmp, and three more:
+#   restart_file     the restart file to read
+#   nloop            the production loops still to run
+#   last_loop_steps  the length of the last loop, so that the run ends on
+#                    the timestep where an uninterrupted run would end
+
+#---------- Run lengths ----------
+# Index variables holding the production values. A test shortens them
+# with -var on the command line (for example -var loop_steps 1000);
+# LAMMPS never redefines an index variable.
+variable loop_steps index 5000000
+variable restart_every index 1000000
+
+read_restart ${restart_file}
+
+#---------- Pair cutoffs, for the ghost cutoffs of multi lists ----------
+variable sig1 equal 1.0
+
+# r_cut_ij = lj_rcut sigma_ij, with lj_rcut = 2^(1/6)
+variable lj_rcut equal 1.12246205
+variable cutoff11 equal ${sig1}*${lj_rcut}
+variable cutoff22 equal ${sig2}*${lj_rcut}
+variable cutoff33 equal ${sig3}*${lj_rcut}
+
+variable run_name string al${sig2}nl${n_big}ml${mass2}ns${n_small}ac${sig3}nc${n_crowd}l${l}dt${run_dt}bdump${bug_dump}adump${all_dump}ens${i}
+
+#---------- Neighbor lists ----------
+# The run's row names the style. bin: one bin size for all atom types.
+# multi: a bin size and a ghost cutoff (pair cutoff plus skin) per atom
+# type, for the large size ratio of small monomers, large monomers, and
+# crowders.
+neighbor ${neigh_skin} ${neigh_style}
+neigh_modify delay 0 every 1 check yes
+variable gRcut1 equal ${cutoff11}+${neigh_skin}
+variable gRcut2 equal ${cutoff22}+${neigh_skin}
+variable gRcut3 equal ${cutoff33}+${neigh_skin}
+if "${neigh_style} == multi" then &
+    "neigh_modify collection/type 3 1 2 3" &
+    "comm_modify mode multi cutoff/multi 1 ${gRcut1} cutoff/multi 2 ${gRcut2} cutoff/multi 3 ${gRcut3}"
+
+fix F_langevin all langevin 1.0 1.0 10.0 ${randseed}
+
+#---------- Production, continued ----------
+fix F_nve all nve
+fix F_recenter bug recenter 0.0 0.0 0.0 shift all units box
+timestep ${run_dt}
+thermo_style multi
+thermo 10000
+
+dump D_bug bug atom ${bug_dump} ${run_name}.ring.bug.restart.lammpstrj
+dump_modify D_bug scale no
+
+variable fname string input.lmp
+variable j loop ${nloop} pad
+    label dump_loop
+    dump D_all all atom ${all_dump} ${run_name}.j${j}.ring.all.restart.lammpstrj.gz
+    dump_modify D_all scale no pad 2
+    restart ${restart_every} ./restarts/restart.${i}
+    if "$j == ${nloop}" then "run ${last_loop_steps}" else "run ${loop_steps}"
+    undump D_all
+    next j
+    jump ${fname} dump_loop
+undump D_bug
+write_data ${run_name}.ring.all.data pair ij
+write_restart ./restart_after.i${i}

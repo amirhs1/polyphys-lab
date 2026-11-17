@@ -29,12 +29,14 @@ polyphys-lab/
     tests/              shell tests of the stages
   projects/             one folder per study
     <study>/
-      README.md         the paper, the state points, and what ran where
+      README.md         the paper, the runs, and the LAMMPS inputs
       python/           parser.py, spec.py, driver.py, corrections.py, tests/
-      lammps/           input templates, restart inputs, start configurations
-      slurm/            study.conf and thin wrappers that call pipeline/
+      lammps/
+        <variant>/      the inputs and the study.conf of one set of runs
+        start/          the start configuration
+      slurm/            thin wrappers that call pipeline/
       notebooks/        the study's notebooks
-      runs/manifest.csv one row per run name
+      runs/manifest.csv one row per run
   notebooks/            plot settings and notebooks shared by the studies
   tests/                the layout checks and the cross-study spec checks
     probe/, analyze/,   the studies' specs run on real frames, and the
@@ -42,8 +44,8 @@ polyphys-lab/
     data/probe/         trimmed real frames of 22 wholes of the four studies
 ```
 
-A stage in `pipeline/` takes the study as an argument and reads the study's
-`slurm/study.conf`; it never names a study itself.
+A stage in `pipeline/` takes the study and the variant as arguments and reads
+the variant's `study.conf`; it never names a study itself.
 
 ## Install
 

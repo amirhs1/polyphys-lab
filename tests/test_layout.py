@@ -8,8 +8,9 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 STUDY_CODE_PARTS = ("README.md", "python/__init__.py", "python/tests")
 STUDY_RUN_PARTS = (
-    "lammps/README.md",
-    "slurm/study.conf",
+    "lammps/*/study.conf",
+    "lammps/*/production.lmp",
+    "slurm",
     "notebooks",
     "runs/manifest.csv",
 )
@@ -26,12 +27,13 @@ def test_package_imports() -> None:
 
 
 def _missing(parts: tuple[str, ...]) -> list[str]:
-    """Return ``<study>/<part>`` for each part a study folder lacks."""
+    """Return ``<study>/<part>`` for each part a study folder lacks; a
+    part is a path or a glob pattern that at least one path must match."""
     return [
         f"{study.name}/{part}"
         for study in _studies()
         for part in parts
-        if not (study / part).exists()
+        if not any(study.glob(part))
     ]
 
 
@@ -44,7 +46,8 @@ def test_every_study_has_its_code() -> None:
     strict=True,
     reason="the LAMMPS, SLURM, notebook, and run parts are not written yet")
 def test_every_study_has_its_run_parts() -> None:
-    """Each study folder holds its LAMMPS, SLURM, notebook, and run parts."""
+    """Each study folder holds a variant folder with its ``study.conf`` and
+    production input, and its SLURM, notebook, and run parts."""
     assert _missing(STUDY_RUN_PARTS) == []
 
 
