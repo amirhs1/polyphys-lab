@@ -20,8 +20,8 @@ One folder per study. "Project" and "study" name the same thing.
   LAMMPS version and modules, its sweep, and the resource table that the
   stages in `pipeline/` read. A study whose runs all share their physics
   and numerics has one variant.
-- `lammps/start/` holds the start configuration and the script that
-  builds it.
+- `lammps/start/` holds the start configuration, and the script that
+  builds it where one exists.
 - `runs/manifest.csv` lists every run of the study by variant and name.
 
 `tests/test_layout.py` checks that every study folder has these parts.
