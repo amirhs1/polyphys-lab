@@ -37,14 +37,12 @@ reference_distances
 Real frames
 -----------
 The tier B files are in ``tests/data/probe/<whole>/``: for each of
-22 wholes of the four live studies, the last 50 frames of the polymer group
+14 wholes of the three live studies, the last 50 frames of the polymer group
 dump (``<whole>.ring.<group>.last50.lammpstrj.gz``), and for the wholes
-without crowders and the HnsCyl wholes at ``ac2 nc386``, the ``all`` frames
-of the same time window (``<whole>.j<NN>.ring.all.window.lammpstrj.gz``)
-and the whole's data file (``<whole>.ring.all.data.gz``). The maintainer
-trimmed them from the studies' runs. The HnsCyl runs name their wholes
-without ``epshc``; their copies here insert ``epshc1``, the value of their
-H-NS core-crowder pair coefficients, so that the parser reads them.
+without crowders, the ``all`` frames of the same time window
+(``<whole>.j<NN>.ring.all.window.lammpstrj.gz``) and the whole's data file
+(``<whole>.ring.all.data.gz``). The maintainer trimmed them from the
+studies' runs.
 
 The tier C files, the ``all`` windows and data files of the other crowded
 wholes, stay in the maintainer's folder
@@ -105,9 +103,6 @@ class RealWhole:
         all 25 for Hns, whose ``all`` dump period (10000) is twice the
         ``nucleoid`` one (5000); 10 for TransFoci, whose periods are 5000
         and 2000.
-    source : str
-        The whole's folder in the maintainer's fixtures folder: `whole`,
-        but without ``epshc1`` for HnsCyl.
     """
 
     id: str
@@ -122,7 +117,6 @@ class RealWhole:
     window_tier: str
     n_window_frames: int
     n_shared_frames: int
-    source: str
 
     def polymer_counts(self) -> dict[str, int]:
         """The atoms of each species of the study's spec in the polymer
@@ -142,12 +136,10 @@ class RealWhole:
 
 
 def _real_wholes() -> list[RealWhole]:
-    """The 22 real wholes: per study, two replicates without crowders and
+    """The 14 real wholes: per study, two replicates without crowders and
     two at a bulk crowder volume fraction of about 0.36 to 0.38, and for
-    the Hns studies the wholes without H-NS; HnsCyl adds crowders of size
-    1."""
+    HnsCub the two wholes without H-NS."""
     hns_cub = 'N200kbmm2nh{nh}ac2l25epshc1nc{nc}ens{e}'
-    hns_cyl = 'N200kbmm2r4.5nh{nh}ac{ac}lz75epshc1nc{nc}ens{e}'
     foci_cub = ('al6nl5ml216ns400ac1nc{nc}l{l}dt0.005bdump2000adump5000'
                 'ens{e}')
     foci_cyl = ('epss5epsl5r10.5al6nl5ml216ns400ac1nc{nc}lz{l}dt0.005'
@@ -159,14 +151,7 @@ def _real_wholes() -> list[RealWhole]:
             wholes.append(RealWhole(
                 f"HnsCub-nh{nh}-nc{nc}-ens{e}", 'hns_cub', name,
                 hns_cub.format(nh=nh, nc=0, e=e), 'nucleoid', 200, 0, nh,
-                nc, tier, 25, 25, name))
-        for nh, ac, nc, tier in ((0, 2, 0, 'B'), (30, 2, 0, 'B'),
-                                 (30, 2, 386, 'B'), (30, 1, 4032, 'C')):
-            name = hns_cyl.format(nh=nh, ac=ac, nc=nc, e=e)
-            wholes.append(RealWhole(
-                f"HnsCyl-nh{nh}-ac{ac}-nc{nc}-ens{e}", 'hns_cyl', name,
-                hns_cyl.format(nh=nh, ac=2, nc=0, e=e), 'nucleoid', 200, 0,
-                nh, nc, tier, 25, 25, name.replace('epshc1', '')))
+                nc, tier, 25, 25))
         for template, study, label, uncrowded, crowded in (
                 (foci_cub, 'trans_foci_cub', 'TransFociCub',
                  (0, '46.5'), (112776, '27')),
@@ -177,7 +162,7 @@ def _real_wholes() -> list[RealWhole]:
                 name = template.format(nc=nc, l=length, e=e)
                 wholes.append(RealWhole(
                     f"{label}-nc{nc}-ens{e}", study, name, topology, 'bug',
-                    405, 5, 0, nc, tier, 20, 10, name))
+                    405, 5, 0, nc, tier, 20, 10))
     return sorted(wholes, key=lambda whole: whole.id)
 
 
@@ -189,20 +174,20 @@ def _params(keep: Callable[[RealWhole], bool]) -> list[Any]:
 
 @pytest.fixture(params=_params(lambda whole: True))
 def real_polymer_whole(request: pytest.FixtureRequest) -> RealWhole:
-    """Each of the 22 real wholes, whose polymer dumps are all tier B."""
+    """Each of the 14 real wholes, whose polymer dumps are all tier B."""
     return request.param
 
 
 @pytest.fixture(params=_params(lambda whole: whole.window_tier == 'B'))
 def real_window_whole(request: pytest.FixtureRequest) -> RealWhole:
     """Each real whole whose ``all`` window and data file are tier B: the
-    12 without crowders and the 2 HnsCyl wholes at ``ac2 nc386``."""
+    8 without crowders."""
     return request.param
 
 
 @pytest.fixture(params=_params(lambda whole: whole.window_tier == 'C'))
 def real_crowded_whole(request: pytest.FixtureRequest) -> RealWhole:
-    """Each of the 8 crowded wholes whose ``all`` window and data file are
+    """Each of the 6 crowded wholes whose ``all`` window and data file are
     tier C."""
     return request.param  # pragma: no cover - needs data
 
@@ -215,14 +200,14 @@ def real_foci_whole(request: pytest.FixtureRequest) -> RealWhole:
 
 @pytest.fixture(params=_params(lambda whole: whole.n_hns > 0))
 def real_hns_whole(request: pytest.FixtureRequest) -> RealWhole:
-    """Each of the 10 Hns wholes with H-NS proteins."""
+    """Each of the 4 HnsCub wholes with H-NS proteins."""
     return request.param
 
 
 @pytest.fixture(params=_params(
     lambda whole: whole.group == 'nucleoid' and whole.n_hns == 0))
 def real_nh0_whole(request: pytest.FixtureRequest) -> RealWhole:
-    """Each of the 4 Hns wholes without H-NS proteins."""
+    """Each of the 2 HnsCub wholes without H-NS proteins."""
     return request.param
 
 
@@ -275,16 +260,16 @@ def private_window_files(
     study_spec: Callable[[str], ModuleType],
 ) -> Callable[[RealWhole], tuple[Path, Path]]:
     """Factory: the tier C ``all`` window and data file of a crowded whole,
-    under ``<POLYPHYS_DATA_DIR>/<project>/trjs/<source>/``, with
+    under ``<POLYPHYS_DATA_DIR>/<project>/trjs/<whole>/``, with
     ``<project>`` the study's project name (``SPEC.name``, such as
     ``HnsCub``). Use it only in a test marked ``private_data``."""
 
     def _files(whole: RealWhole) -> tuple[Path, Path]:  # pragma: no cover
         project = study_spec(whole.study).SPEC.name
-        folder = private_data_dir / project / 'trjs' / whole.source
-        (window,) = sorted(folder.glob(f"{whole.source}.j*.ring.all.window."
+        folder = private_data_dir / project / 'trjs' / whole.whole
+        (window,) = sorted(folder.glob(f"{whole.whole}.j*.ring.all.window."
                                        "lammpstrj.gz"))
-        return window, folder / f"{whole.source}.ring.all.data.gz"
+        return window, folder / f"{whole.whole}.ring.all.data.gz"
 
     return _files  # pragma: no cover - needs data
 

@@ -14,7 +14,6 @@ import pytest
 
 from polyphys.analyze.pipeline import FociPairDistances, LocalDensities
 from polyphys_lab.hns_cub.parser import HnsCub
-from polyphys_lab.hns_cyl.parser import HnsCyl
 from polyphys.manage.parser import ParserBase
 from polyphys_lab.trans_foci_cub.parser import TransFociCub
 from polyphys_lab.trans_foci_cyl.parser import TransFociCyl
@@ -36,7 +35,6 @@ def _spec(module: str) -> ProjectSpec:
     pytest.param('trans_foci_cyl', 'TransFociCyl', id='TransFociCyl'),
     pytest.param('trans_foci_cub', 'TransFociCub', id='TransFociCub'),
     pytest.param('hns_cub', 'HnsCub', id='HnsCub'),
-    pytest.param('hns_cyl', 'HnsCyl', id='HnsCyl'),
 ])
 def test_study_spec_uses_its_parser(module: str, name: str) -> None:
     """Each study module's spec is built on that study's parser class."""
@@ -47,7 +45,6 @@ def test_study_spec_uses_its_parser(module: str, name: str) -> None:
     pytest.param('trans_foci_cyl', id='TransFociCyl'),
     pytest.param('trans_foci_cub', id='TransFociCub'),
     pytest.param('hns_cub', id='HnsCub'),
-    pytest.param('hns_cyl', id='HnsCyl'),
 ])
 def test_study_names_only_attributes_its_parser_sets(module: str) -> None:
     """Every attribute a spec names is set at ensemble_long by its parser."""
@@ -64,7 +61,6 @@ def test_study_names_only_attributes_its_parser_sets(module: str) -> None:
     pytest.param('trans_foci_cyl', 'bug', 0.025, id='TransFociCyl'),
     pytest.param('trans_foci_cub', 'bug', 0.025, id='TransFociCub'),
     pytest.param('hns_cub', 'nucleoid', 0.01, id='HnsCub'),
-    pytest.param('hns_cyl', 'nucleoid', 0.01, id='HnsCyl'),
 ])
 def test_study_group_and_divisor(module: str, group: str,
                                  divisor: float) -> None:
@@ -82,7 +78,6 @@ def test_study_group_and_divisor(module: str, group: str,
     pytest.param('trans_foci_cub', 'cubic', 'ring', ('r',),
                  id='TransFociCub'),
     pytest.param('hns_cub', 'cubic', 'ring', ('r',), id='HnsCub'),
-    pytest.param('hns_cyl', 'cylindrical', 'ring', ('r', 'z'), id='HnsCyl'),
 ])
 def test_study_geometry_follows_parser(module: str, geometry: str,
                                        topology: str,
@@ -100,7 +95,6 @@ def test_study_geometry_follows_parser(module: str, geometry: str,
                  id='TransFociCyl'),
     pytest.param('trans_foci_cub', 'ns*nl*al*ac*', 'ns*', id='TransFociCub'),
     pytest.param('hns_cub', 'N*kbmm*nh*ac*epshc*', 'N*', id='HnsCub'),
-    pytest.param('hns_cyl', 'N*D*nh*ac*epshc*', 'N*', id='HnsCyl'),
 ])
 def test_study_space_patterns(module: str, space_pattern: str,
                               space_hierarchy: str) -> None:
@@ -116,7 +110,6 @@ def test_study_space_patterns(module: str, space_pattern: str,
     # next test).
     pytest.param('trans_foci_cub', 'al*', id='TransFociCub'),
     pytest.param('hns_cub', 'N*', id='HnsCub'),
-    pytest.param('hns_cyl', 'N*', id='HnsCyl'),
 ])
 def test_study_hierarchy(module: str, hierarchy: str) -> None:
     """The ensemble_long glob prefix derived from the parser matches."""
@@ -151,10 +144,6 @@ def test_trans_foci_cyl_hierarchy_matches_its_names() -> None:
                  ('space', 'ensemble_long', 'ensemble', 'bend_mm', 'eps_hc',
                   'nmon', 'nhns', 'dcrowd', 'phi_bulk_c', 'rho_bulk_hns'),
                  id='HnsCub'),
-    pytest.param('hns_cyl',
-                 ('space', 'ensemble_long', 'ensemble', 'dcyl', 'nmon',
-                  'nhns', 'dcrowd', 'phi_bulk_c', 'rho_bulk_hns'),
-                 id='HnsCyl'),
 ])
 def test_study_physical_attrs(module: str, expected: tuple[str, ...]) -> None:
     """Each study adds its attributes as columns, in order."""
@@ -174,9 +163,6 @@ def test_study_physical_attrs(module: str, expected: tuple[str, ...]) -> None:
     pytest.param('hns_cub', [('Mon', 'dmon'), ('Crd', 'dcrowd'),
                              ('Hns', 'dhns')],
                  id='HnsCub'),
-    pytest.param('hns_cyl', [('Mon', 'dmon'), ('Crd', 'dcrowd'),
-                             ('Hns', 'dhns')],
-                 id='HnsCyl'),
 ])
 def test_study_species_sizes(module: str,
                              expected: list[tuple[str, str]]) -> None:
@@ -202,13 +188,6 @@ def test_study_species_sizes(module: str,
                   'nEngagedTHnsPatch', 'nFreeTHnsCore', 'nBridgeTHnsCore',
                   'nDangleTHnsCore', 'nCisTHnsCore', 'nTransTHnsCore'),
                  id='HnsCub'),
-    pytest.param('hns_cyl',
-                 ('asphericityTMon', 'fsdTMon', 'shapeTMon', 'gyrTMon',
-                  'transSizeTMon', 'bondLengthVecMon', 'nBoundTHnsPatch',
-                  'nFreeTHnsPatch', 'nEngagedTHnsPatch', 'nFreeTHnsCore',
-                  'nBridgeTHnsCore', 'nDangleTHnsCore', 'nCisTHnsCore',
-                  'nTransTHnsCore'),
-                 id='HnsCyl'),
 ])
 def test_study_tseries_properties(module: str,
                                   expected: tuple[str, ...]) -> None:
@@ -223,7 +202,6 @@ STUDIES = [
     pytest.param('trans_foci_cyl', id='TransFociCyl'),
     pytest.param('trans_foci_cub', id='TransFociCub'),
     pytest.param('hns_cub', id='HnsCub'),
-    pytest.param('hns_cyl', id='HnsCyl'),
 ]
 
 
@@ -310,19 +288,6 @@ def _planar(species: tuple[str, ...]) -> set[str]:
                  {'rHistCrd', 'rHistMon', 'rHistHns'}
                  | _planar(('Crd', 'Mon', 'Hns')),
                  id='HnsCub-all'),
-    pytest.param('hns_cyl', 'nucleoid',
-                 {'principalTMon', 'loopLengthHistMon',
-                  'bondCosineCorrVecMon', 'bondLengthVecMon',
-                  'nBoundTHnsPatch', 'nFreeTHnsPatch', 'nEngagedTHnsPatch',
-                  'nFreeTHnsCore', 'nBridgeTHnsCore', 'nDangleTHnsCore',
-                  'nCisTHnsCore', 'nTransTHnsCore', 'fsdTMon', 'gyrTMon',
-                  'transSizeTMon', 'shapeTMon', 'asphericityTMon'},
-                 id='HnsCyl-nucleoid'),
-    pytest.param('hns_cyl', 'all',
-                 {f'{d}Hist{sp}' for d in ('r', 'z', 'theta')
-                  for sp in ('Crd', 'Mon', 'Hns')}
-                 | _planar(('Crd', 'Mon', 'Hns')),
-                 id='HnsCyl-all'),
 ])
 def test_study_properties_match_the_research_tables(
         module: str, group: str, expected: set[str]) -> None:
@@ -382,9 +347,6 @@ def test_study_probe_is_built_on_its_spec(module: str) -> None:
     pytest.param('hns_cub', [('Mon', 'resid 1'), ('HnsPatch', 'type 2'),
                              ('Crd', 'resid 0'), ('Hns', 'type 3')],
                  id='HnsCub'),
-    pytest.param('hns_cyl', [('Mon', 'resid 1'), ('HnsPatch', 'type 2'),
-                             ('Crd', 'resid 0'), ('Hns', 'type 3')],
-                 id='HnsCyl'),
 ])
 def test_study_probe_selections(module: str,
                                 selections: list[tuple[str, str]]) -> None:
@@ -410,10 +372,6 @@ def test_study_probe_selections(module: str,
                  id='TransFociCub'),
     pytest.param('hns_cub', ('asphericityT', 'gyrT', 'shapeT', 'principalT'),
                  id='HnsCub'),
-    pytest.param('hns_cyl',
-                 ('asphericityT', 'fsdT', 'shapeT', 'gyrT', 'transSizeT',
-                  'principalT'),
-                 id='HnsCyl'),
 ])
 def test_study_probe_observables(module: str,
                                  observables: tuple[str, ...]) -> None:
@@ -428,7 +386,6 @@ def test_study_probe_observables(module: str,
     pytest.param('trans_foci_cyl', False, id='TransFociCyl'),
     pytest.param('trans_foci_cub', True, id='TransFociCub'),
     pytest.param('hns_cub', True, id='HnsCub'),
-    pytest.param('hns_cyl', False, id='HnsCyl'),
 ])
 def test_study_probe_unwraps_in_a_cube_only(module: str,
                                             unwrap: bool) -> None:
@@ -447,8 +404,6 @@ def test_study_probe_unwraps_in_a_cube_only(module: str,
                  ['r', 'x', 'y', 'z'], id='TransFociCub'),
     pytest.param('hns_cub', ('Crd', 'Mon', 'Hns'), ['r', 'x', 'y', 'z'],
                  id='HnsCub'),
-    pytest.param('hns_cyl', ('Crd', 'Mon', 'Hns'),
-                 ['r', 'z', 'theta', 'x', 'y'], id='HnsCyl'),
 ])
 def test_study_probe_histogram_fields(module: str, species: tuple[str, ...],
                                       keys: list[str]) -> None:
@@ -479,9 +434,6 @@ def test_study_probe_histogram_fields(module: str, species: tuple[str, ...],
     pytest.param('hns_cub', HnsCub(
         'N200kbmm2.5nh8ac0.5l25.0epshc1.5nc0ens1.ring', 'whole', 'all'),
         0.05, 0.25, None, id='HnsCub'),
-    pytest.param('hns_cyl', HnsCyl(
-        'N200kbmm2.0r4.5nh8ac3.0lz50epshc1.0nc0ens1', 'whole', 'all'),
-        0.1, 0.5, np.pi / 36, id='HnsCyl'),
 ])
 def test_study_probe_bin_sizes_follow_the_whole(
         module: str, info: ParserBase, r: float, cartesian: float,
@@ -506,7 +458,6 @@ def test_study_probe_bin_sizes_follow_the_whole(
 
 @pytest.mark.parametrize('module', [
     pytest.param('hns_cub', id='HnsCub'),
-    pytest.param('hns_cyl', id='HnsCyl'),
 ])
 def test_hns_radial_bin_includes_the_core_diameter(module: str) -> None:
     """An H-NS core smaller than the monomer and the crowder sets the radial
@@ -530,7 +481,6 @@ def test_hns_radial_bin_includes_the_core_diameter(module: str) -> None:
     pytest.param('trans_foci_cyl', 'Foci', 3.5, id='TransFociCyl'),
     pytest.param('trans_foci_cub', 'Foci', 3.5, id='TransFociCub'),
     pytest.param('hns_cub', None, None, id='HnsCub'),
-    pytest.param('hns_cyl', None, None, id='HnsCyl'),
 ])
 def test_study_probe_pair_fields(module: str, pair: str | None,
                                  cutoff: float | None) -> None:
@@ -567,11 +517,6 @@ def test_study_probe_pair_fields(module: str, pair: str | None,
                             inclusive=True, cis_threshold=3,
                             patches_per_binder=2, store_distances=True),
                  id='HnsCub'),
-    pytest.param('hns_cyl',
-                 BinderSpec('HnsPatch', 'HnsCore', cutoff=0.685,
-                            inclusive=True, cis_threshold=3,
-                            patches_per_binder=2, store_distances=True),
-                 id='HnsCyl'),
 ])
 def test_study_probe_binders(module: str,
                              binders: BinderSpec | None) -> None:
