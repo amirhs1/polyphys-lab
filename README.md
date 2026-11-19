@@ -93,6 +93,43 @@ Copy `config/cluster.conf.example` to `config/cluster.conf` and fill it in.
 `cluster.conf` is ignored by git: account names, addresses, and storage paths
 live only there. Each stage has a `README.md` that is its runbook.
 
+## AI assistance
+
+This repository is developed with the help of AI coding assistants. Every
+change is reviewed and merged by the maintainer, who is accountable for the
+result; no AI system is an author of it. See [`AI-POLICY.md`](AI-POLICY.md)
+for the full policy, including what is expected of AI-assisted contributions.
+
+Each part has a tier, set by whether I can evaluate AI output there. The table
+records the checks or human review applied to each part:
+
+- **Instrumented** — I could write it myself. AI is used for review,
+  refactoring, and alternative implementations, not first drafts of core logic.
+- **Supervised** — AI drafts; I read every line and set the acceptance criteria
+  and test values.
+- **Delegated** — AI generates; I can't fully evaluate it. It is covered by
+  tests, kept isolated and low-risk, and not presented as my work.
+
+| Part                                                            | Tier       | Checks or human review                                                                                               |
+| --------------------------------------------------------------- | ---------- | -------------------------------------------------------------------------------------------------------------------- |
+| `projects/<study>/lammps/`, `projects/<study>/runs/`            | Supervised | CI: the template checks; each input compared with the published runs, as its study README says; every line reviewed  |
+| `projects/<study>/python/`, `tests/`, `tools/`, `polyphys_lab/` | Supervised | CI: flake8, mypy, pytest on Python 3.14, and the tests against PolyPhys `main`; maintainer review of every line      |
+| `pipeline/`, `projects/<study>/slurm/`, `config/`               | Supervised | CI: ShellCheck; no script yet, and nothing run on a cluster; maintainer review of every line                         |
+| `notebooks/`, `projects/<study>/notebooks/`                     | Supervised | No notebook yet; maintainer review of every line                                                                     |
+| `.github/workflows/`, `pyproject.toml`                          | Supervised | CI on every pull request; maintainer review of every line                                                            |
+
+Nothing that handles security, credentials, private data, or published results,
+or that can block a merge, is Delegated. Where a tier is unclear, I treat the
+part as Supervised. Tiers last reviewed: 2026-11-19.
+
+Instructions for AI agents: [`AGENTS.md`](AGENTS.md).
+
+## Contributing
+
+See [`CONTRIBUTING.md`](CONTRIBUTING.md) for the setup, the checks, and the
+names of branches, commits, and labels, and [`SECURITY.md`](SECURITY.md) for
+reporting a vulnerability.
+
 ## License
 
 MIT; see `LICENSE`.
