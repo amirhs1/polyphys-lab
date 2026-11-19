@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any, NamedTuple, cast
 
 import pytest
-from hypothesis import given, settings
+from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
 
 from polyphys.manage.parser import ParserBase
@@ -612,7 +612,12 @@ def test_attributes_at_matches_parsed_instance(
     pytest.param('ensemble', id='ensemble'),
     pytest.param('space', id='space'),
 ])
-@settings(max_examples=50, deadline=None)
+# lineage_names keeps a name only when the cylinder is wider than every
+# species, which rejects most draws here; without the suppression the test
+# fails now and then on Hypothesis's check for filtered inputs
+# (amirhs1/PolyPhys#281).
+@settings(max_examples=50, deadline=None,
+          suppress_health_check=[HealthCheck.filter_too_much])
 @given(data=st.data())
 def test_generated_name_parses_to_its_values_and_back(
         lineage: LineageT, data: st.DataObject) -> None:
