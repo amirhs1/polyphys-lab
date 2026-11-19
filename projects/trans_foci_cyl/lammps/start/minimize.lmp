@@ -1,0 +1,122 @@
+# TransFociCyl: relaxation of the ring alone that gives
+# minimized.initial.config.data, the relaxed chain that the crowded runs with
+# large monomers of size 1 share (the sweep rows with relax_steps "shared"
+# in ../wca/study.conf). Those runs do not relax their own chain: each run
+# folder gets a copy of that file.
+#
+# The ring is read from the start configuration into the cylinder of those
+# runs, its bonds are made harmonic, and it runs relax_steps steps (1e5) with
+# displacements capped and a Langevin thermostat. Every value is written
+# here; no sweep row is read. It runs on one core.
+#
+# Atom types: 1 small monomer, 2 large monomer, 3 crowder (none yet).
+
+#---------- Run length ----------
+# An index variable holding the production value. A test shortens it with
+# -var on the command line (for example -var relax_steps 1000); LAMMPS
+# never redefines an index variable.
+variable relax_steps index 100000
+
+#---------- The state point ----------
+# Large monomers of size and mass 1, crowders of size 1, a cylinder of
+# radius r and half-length lz, wall strengths 5, and the seed 1.
+variable mass2 equal 1
+variable sig2 equal 1
+variable sig3 equal 1
+variable lz equal 65.5
+variable randseed equal 1
+variable epsilon_big equal 5
+variable epsilon_small equal 5
+variable r equal 10.5
+
+#---------- Sizes and pair cutoffs ----------
+# sigma_ij = (sigma_i + sigma_j) / 2
+variable sig1 equal 1.0
+variable sig12 equal (${sig1}+${sig2})/2
+variable sig13 equal (${sig1}+${sig3})/2
+variable sig23 equal (${sig2}+${sig3})/2
+
+# r_cut_ij = lj_rcut sigma_ij, with lj_rcut = 2^(1/6)
+variable lj_rcut equal 1.12246205
+variable cutoff11 equal ${sig1}*${lj_rcut}
+variable cutoff12 equal ((${sig1}+${sig2})/2.0)*${lj_rcut}
+variable cutoff13 equal ((${sig1}+${sig3})/2.0)*${lj_rcut}
+variable cutoff22 equal ${sig2}*${lj_rcut}
+variable cutoff23 equal ((${sig2}+${sig3})/2.0)*${lj_rcut}
+variable cutoff33 equal ${sig3}*${lj_rcut}
+
+#---------- Initialization ----------
+units lj
+dimension 3
+boundary f f p
+atom_style bond
+
+read_data foci-ring-ns400nl5.data
+
+#---------- Neighbor lists ----------
+# bin lists with a skin of 0.3, and one ghost cutoff for all atom types:
+# the small-large pair cutoff plus the skin plus 0.5.
+variable neigh_skin equal 0.3
+neighbor ${neigh_skin} bin
+neigh_modify delay 0 every 1 check yes
+variable ghost_cutoff equal ${cutoff12}+${neigh_skin}+0.5
+comm_modify mode single cutoff ${ghost_cutoff}
+
+#---------- Cylinder ----------
+# Fixed in x and y, periodic along z, the axis; the wall is the cylinder of
+# radius r around the axis.
+change_box all x final -${r} ${r} y final -${r} ${r} z final -${lz} ${lz} boundary f f p units box
+region cylshell cylinder z 0.0 0.0 ${r} INF INF units box
+
+group bug_small type 1
+group bug_big type 2
+group bug type 1 2
+group crowd type 3
+
+mass 1 1.0
+mass 2 ${mass2}
+mass 3 1.0
+
+compute mobile bug temp
+
+#---------- Pair potential ----------
+# lj/cut with epsilon = 1, sigma_ij as above, and the cutoff r_cut_ij at the
+# minimum of the 12-6 potential: the forces are those of the
+# Weeks-Chandler-Andersen potential. The energy is not shifted.
+pair_style lj/cut ${lj_rcut}
+pair_coeff 1 1 1.0 ${sig1} ${cutoff11}
+pair_coeff 1 2 1.0 ${sig12} ${cutoff12}
+pair_coeff 1 3 1.0 ${sig13} ${cutoff13}
+pair_coeff 2 2 1.0 ${sig2} ${cutoff22}
+pair_coeff 2 3 1.0 ${sig23} ${cutoff23}
+pair_coeff 3 3 1.0 ${sig3} ${cutoff33}
+
+#---------- Harmonic bonds along the ring ----------
+# K_ij = 80 epsilon / sigma_ij^2 and r0_ij = sigma_ij, with epsilon = 1 and
+# sigma_11 = 1; bond type 1 joins two small monomers, type 2 a small and a
+# large one.
+bond_style harmonic
+variable sig11harmonic equal 1*${sig1}
+variable sig12harmonic equal ${sig11harmonic}*(${sig12}/${sig1})
+variable k11harmonic equal 80/(${sig1}*${sig1})
+variable k12harmonic equal ${k11harmonic}*((${sig1}/${sig12})^2)
+bond_coeff 1 ${k11harmonic} ${sig11harmonic}
+bond_coeff 2 ${k12harmonic} ${sig12harmonic}
+
+#---------- Relaxation ----------
+# The wall repels each species with the 12-6 Lennard-Jones potential of its
+# size, cut at its minimum.
+fix F_nve all nve/limit 0.01
+fix F_langevin all langevin 1.0 1.0 10.0 ${randseed}
+fix F_wall_small bug_small wall/region cylshell lj126 ${epsilon_small} ${sig1} ${cutoff11}
+fix F_wall_big bug_big wall/region cylshell lj126 ${epsilon_big} ${sig12} ${cutoff12}
+fix F_wall_crowd crowd wall/region cylshell lj126 1.0 ${sig13} ${cutoff13}
+fix F_recenter bug recenter NULL NULL 0.0 shift all units box
+thermo 10000
+thermo_style multi
+timestep 0.01
+run ${relax_steps}
+write_data minimized.initial.config.data
+
+unfix F_nve
+unfix F_recenter

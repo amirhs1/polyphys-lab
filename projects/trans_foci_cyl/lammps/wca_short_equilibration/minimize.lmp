@@ -1,0 +1,119 @@
+# TransFociCyl, variant wca_short_equilibration: relaxation of the ring
+# alone, before the crowders are added. The ring is read from the start
+# configuration into the cylinder of the run, its bonds are made harmonic,
+# and it runs relax_steps steps (1e5) with displacements capped and a
+# Langevin thermostat.
+# The result, minimized.initial.config.data, is what production.lmp reads.
+# It uses multi neighbor lists with a skin of 0.3 in every run, and runs on
+# one core.
+#
+# The run's folder holds this file as minimize_initial_config.lmp and the
+# start configuration, foci-ring-ns400nl5.data. The sweep generator writes
+# the run's variables at the top of the file, from its row of SWEEP in
+# study.conf; this input reads sig2, mass2, sig3, r, lz, epsilon_small,
+# epsilon_big, randseed, and relax_steps, an index variable.
+#
+# Atom types: 1 small monomer, 2 large monomer, 3 crowder (none yet).
+
+#---------- Run length ----------
+# Index variables holding the production values. A test shortens them
+# with -var on the command line (for example -var relax_steps 1000);
+# LAMMPS never redefines an index variable. The sweep
+# generator writes the run's own relax_steps before this default.
+variable relax_steps index 100000
+
+#---------- Sizes and pair cutoffs ----------
+# sigma_ij = (sigma_i + sigma_j) / 2
+variable sig1 equal 1.0
+variable sig12 equal (${sig1}+${sig2})/2
+variable sig13 equal (${sig1}+${sig3})/2
+variable sig23 equal (${sig2}+${sig3})/2
+
+# r_cut_ij = lj_rcut sigma_ij, with lj_rcut = 2^(1/6)
+variable lj_rcut equal 1.12246205
+variable cutoff11 equal ${sig1}*${lj_rcut}
+variable cutoff12 equal ((${sig1}+${sig2})/2.0)*${lj_rcut}
+variable cutoff13 equal ((${sig1}+${sig3})/2.0)*${lj_rcut}
+variable cutoff22 equal ${sig2}*${lj_rcut}
+variable cutoff23 equal ((${sig2}+${sig3})/2.0)*${lj_rcut}
+variable cutoff33 equal ${sig3}*${lj_rcut}
+
+#---------- Initialization ----------
+units lj
+dimension 3
+boundary f f p
+atom_style bond
+
+read_data foci-ring-ns400nl5.data
+
+#---------- Neighbor lists ----------
+# multi lists: a bin size and a ghost cutoff (pair cutoff plus skin) per
+# atom type.
+variable neigh_skin equal 0.3
+neighbor ${neigh_skin} multi
+neigh_modify delay 0 every 1 check yes
+neigh_modify collection/type 3 1 2 3
+variable gRcut1 equal ${cutoff11}+${neigh_skin}
+variable gRcut2 equal ${cutoff22}+${neigh_skin}
+variable gRcut3 equal ${cutoff33}+${neigh_skin}
+comm_modify mode multi cutoff/multi 1 ${gRcut1} cutoff/multi 2 ${gRcut2} cutoff/multi 3 ${gRcut3}
+
+#---------- Cylinder ----------
+# Fixed in x and y, periodic along z, the axis; the wall is the cylinder of
+# radius r around the axis.
+change_box all x final -${r} ${r} y final -${r} ${r} z final -${lz} ${lz} boundary f f p units box
+region cylshell cylinder z 0.0 0.0 ${r} INF INF units box
+
+group bug_small type 1
+group bug_big type 2
+group bug type 1 2
+group crowd type 3
+
+mass 1 1.0
+mass 2 ${mass2}
+mass 3 1.0
+
+compute mobile bug temp
+
+#---------- Pair potential ----------
+# lj/cut with epsilon = 1, sigma_ij as above, and the cutoff r_cut_ij at the
+# minimum of the 12-6 potential: the forces are those of the
+# Weeks-Chandler-Andersen potential. The energy is not shifted.
+pair_style lj/cut ${lj_rcut}
+pair_coeff 1 1 1.0 ${sig1} ${cutoff11}
+pair_coeff 1 2 1.0 ${sig12} ${cutoff12}
+pair_coeff 1 3 1.0 ${sig13} ${cutoff13}
+pair_coeff 2 2 1.0 ${sig2} ${cutoff22}
+pair_coeff 2 3 1.0 ${sig23} ${cutoff23}
+pair_coeff 3 3 1.0 ${sig3} ${cutoff33}
+
+#---------- Harmonic bonds along the ring ----------
+# K_ij = 80 epsilon / sigma_ij^2 and r0_ij = sigma_ij, with epsilon = 1 and
+# sigma_11 = 1; bond type 1 joins two small monomers, type 2 a small and a
+# large one.
+bond_style harmonic
+variable sig11harmonic equal 1*${sig1}
+variable sig12harmonic equal ${sig11harmonic}*(${sig12}/${sig1})
+variable k11harmonic equal 80/(${sig1}*${sig1})
+variable k12harmonic equal ${k11harmonic}*((${sig1}/${sig12})^2)
+bond_coeff 1 ${k11harmonic} ${sig11harmonic}
+bond_coeff 2 ${k12harmonic} ${sig12harmonic}
+
+#---------- Relaxation ----------
+# The wall repels each species with the 12-6 Lennard-Jones potential of its
+# size, cut at its minimum; its strength is epsilon_small for the small
+# monomers, epsilon_big for the large ones, and 1 for the crowders.
+fix F_nve all nve/limit 0.01
+fix F_langevin all langevin 1.0 1.0 10.0 ${randseed}
+fix F_wall_small bug_small wall/region cylshell lj126 ${epsilon_small} ${sig1} ${cutoff11}
+fix F_wall_big bug_big wall/region cylshell lj126 ${epsilon_big} ${sig12} ${cutoff12}
+fix F_wall_crowd crowd wall/region cylshell lj126 1.0 ${sig13} ${cutoff13}
+fix F_recenter bug recenter NULL NULL 0.0 shift all units box
+thermo 10000
+thermo_style multi
+timestep 0.01
+run ${relax_steps}
+write_data minimized.initial.config.data
+
+unfix F_nve
+unfix F_recenter
