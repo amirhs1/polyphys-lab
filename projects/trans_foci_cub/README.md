@@ -39,17 +39,6 @@ from polyphys_lab.trans_foci_cub import TransFociCub, SPEC, PROBE, ANALYSIS
 the nominal volume fraction of crowders, N_c (pi / 6) a_c^3 divided by
 the volume of the cube.
 
-- **Why.** To find how crowders compact a ring with a few large
-  monomers, and when the large monomers cluster.
-- **How.** The chain is first relaxed alone in the empty cube, with
-  harmonic bonds. The crowders are then added, the bonds become FENE,
-  and the system is equilibrated for 3e6 steps before 1e8 production
-  steps. The potential is WCA.
-- **Result.** The results of the paper. The chain shrinks as phi_c
-  grows; for `al` = 5 and 6 it reaches full compaction, R_g of about
-  0.4 R_g0, in 0.2 <= phi_c <= 0.4, at the phi_c where the large
-  monomers form a cluster.
-
 ## LAMMPS inputs
 
 A ring of `n_small` small monomers (size 1, mass 1) and `n_big` large
