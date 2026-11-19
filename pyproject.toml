@@ -7,6 +7,7 @@
     version = "0.0.0"
     description = "Study records and the cluster pipeline for PolyPhys."
     readme = "README.md"
+    license = "MIT"
     requires-python = ">=3.11"
     # The lab pins one released PolyPhys; raise the pin deliberately.
     dependencies = [

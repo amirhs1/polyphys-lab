@@ -11,6 +11,20 @@ sweep, each study's parser and specs, and the notebooks that draw its figures.
 This repository depends on a released `polyphys`. PolyPhys does not depend on
 this repository.
 
+## Status
+
+This repository is being built, and nothing in it has been run on a cluster
+from here yet.
+
+- `projects/trans_foci_cub/` and `projects/trans_foci_cyl/` hold their LAMMPS
+  inputs, parsers, and specs. `projects/hns_cub/` and `projects/hns_cyl/`
+  hold their parsers and specs only.
+- Each stage in `pipeline/` has a `README.md` and no script yet.
+- No study has its `slurm/` or `notebooks/` folder yet.
+
+Read the inputs as a record of what the published runs simulated, not as a
+tested workflow.
+
 ## Layout
 
 ```text
@@ -78,3 +92,7 @@ without blocking a merge.
 Copy `config/cluster.conf.example` to `config/cluster.conf` and fill it in.
 `cluster.conf` is ignored by git: account names, addresses, and storage paths
 live only there. Each stage has a `README.md` that is its runbook.
+
+## License
+
+MIT; see `LICENSE`.
