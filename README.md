@@ -38,7 +38,8 @@ polyphys-lab/
       notebooks/        the study's notebooks
       runs/manifest.csv one row per run
   notebooks/            plot settings and notebooks shared by the studies
-  tests/                the layout checks and the cross-study spec checks
+  tests/                the layout checks and the cross-study spec and
+                        template checks
     probe/, analyze/,   the studies' specs run on real frames, and the
     viz/                comparisons with the research code's output
     data/probe/         trimmed real frames of 22 wholes of the four studies

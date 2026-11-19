@@ -35,6 +35,11 @@ One folder per study. "Project" and "study" name the same thing.
 
 `tests/test_studies.py`, at the repository root, checks every study's
 specs against its parser and against the research code's registry.
+`tests/test_templates.py`, beside it, checks the LAMMPS inputs, the
+`study.conf` files, and the manifest of every study that has a variant
+folder. A study's own `python/tests/test_templates.py` holds the checks
+of its system: its run names against its parser, its start
+configuration, and its resource table.
 
 The private-data tests in each `python/tests/test_parser.py` run only
 when `POLYPHYS_DATA_DIR` names a folder of processed artifacts, and are
