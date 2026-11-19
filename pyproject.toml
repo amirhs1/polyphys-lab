@@ -38,7 +38,6 @@
         "polyphys_lab.trans_foci_cyl",
         "polyphys_lab.trans_foci_cub",
         "polyphys_lab.hns_cub",
-        "polyphys_lab.hns_cyl",
     ]
 
 [tool.setuptools.package-dir]
@@ -46,7 +45,6 @@
     "polyphys_lab.trans_foci_cyl" = "projects/trans_foci_cyl/python"
     "polyphys_lab.trans_foci_cub" = "projects/trans_foci_cub/python"
     "polyphys_lab.hns_cub" = "projects/hns_cub/python"
-    "polyphys_lab.hns_cyl" = "projects/hns_cyl/python"
 
 [tool.pytest.ini_options]
     addopts = "-ra --strict-markers --strict-config --import-mode=importlib"

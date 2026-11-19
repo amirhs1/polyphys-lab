@@ -104,7 +104,7 @@ part of the repository. A commit's scope is its area, and the labels are
 
 ```text
 types: feat fix docs test refactor chore question
-areas: projects trans_foci_cub trans_foci_cyl hns_cub hns_cyl pipeline notebooks packaging guide ci agents deps
+areas: projects trans_foci_cub trans_foci_cyl hns_cub pipeline notebooks packaging guide ci agents deps
 ```
 
 | Type       | Means                                                                                             |
@@ -120,7 +120,7 @@ areas: projects trans_foci_cub trans_foci_cyl hns_cub hns_cyl pipeline notebooks
 | Area                                                     | Covers                                                                                                                            |
 | -------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
 | `projects`                                               | `projects/README.md`, the cross-study tests in `tests/`, and a change that spans studies                                          |
-| `trans_foci_cub`, `trans_foci_cyl`, `hns_cub`, `hns_cyl` | That study's folder under `projects/`                                                                                             |
+| `trans_foci_cub`, `trans_foci_cyl`, `hns_cub`            | That study's folder under `projects/`                                                                                             |
 | `pipeline`                                               | `pipeline/`, `config/`                                                                                                            |
 | `notebooks`                                              | `notebooks/`                                                                                                                      |
 | `packaging`                                              | `pyproject.toml`, `polyphys_lab/`, `tools/`, `LICENSE`                                                                            |

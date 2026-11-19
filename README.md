@@ -17,8 +17,8 @@ This repository is being built, and nothing in it has been run on a cluster
 from here yet.
 
 - `projects/trans_foci_cub/` and `projects/trans_foci_cyl/` hold their LAMMPS
-  inputs, parsers, and specs. `projects/hns_cub/` and `projects/hns_cyl/`
-  hold their parsers and specs only.
+  inputs, parsers, and specs. `projects/hns_cub/` holds its parser and
+  specs only.
 - Each stage in `pipeline/` has a `README.md` and no script yet.
 - No study has its `slurm/` or `notebooks/` folder yet.
 
@@ -56,7 +56,7 @@ polyphys-lab/
                         template checks
     probe/, analyze/,   the studies' specs run on real frames, and the
     viz/                comparisons with the research code's output
-    data/probe/         trimmed real frames of 22 wholes of the four studies
+    data/probe/         trimmed real frames of 14 wholes of the three studies
 ```
 
 A stage in `pipeline/` takes the study and the variant as arguments and reads

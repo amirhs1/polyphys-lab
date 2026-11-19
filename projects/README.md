@@ -31,7 +31,6 @@ One folder per study. "Project" and "study" name the same thing.
 | `trans_foci_cyl/` | `TransFociCyl` | `polyphys_lab.trans_foci_cyl` |
 | `trans_foci_cub/` | `TransFociCub` | `polyphys_lab.trans_foci_cub` |
 | `hns_cub/`        | `HnsCub`       | `polyphys_lab.hns_cub`        |
-| `hns_cyl/`        | `HnsCyl`       | `polyphys_lab.hns_cyl`        |
 
 `tests/test_studies.py`, at the repository root, checks every study's
 specs against its parser and against the research code's registry.

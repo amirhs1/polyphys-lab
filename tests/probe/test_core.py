@@ -60,10 +60,6 @@ def test_spec_selections_pick_the_species_of_a_real_window(
                  {'nmon': 200, 'nhns': 30, 'dcrowd': 2.0, 'lcube': 50.0,
                   'eps_hc': 1.0, 'ncrowd': 10743, 'ensemble_id': 1},
                  id='HnsCub'),
-    pytest.param('hns_cyl', 'N200kbmm2r4.5nh30ac2lz75epshc1nc386ens2',
-                 {'nmon': 200, 'nhns': 30, 'dcrowd': 2.0, 'dcyl': 8.0,
-                  'lcyl': 150.0, 'ncrowd': 386, 'ensemble_id': 2},
-                 id='HnsCyl'),
     pytest.param('trans_foci_cub',
                  'al6nl5ml216ns400ac1nc112776l27dt0.005bdump2000adump5000'
                  'ens1',
