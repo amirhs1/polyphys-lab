@@ -30,32 +30,27 @@ from polyphys_lab.trans_foci_cub import TransFociCub, SPEC, PROBE, ANALYSIS
 
 384 runs, in one variant, `wca`, named after its pair potential.
 
-| `al` | phi_c | Replicates | Runs |
+| `al` | $\phi_c$ | Replicates | Runs |
 | --- | --- | --- | --- |
 | 1, 3, 5 | 0 to 0.4, 12 values | 8 | 288 |
 | 4, 6 | 0 to 0.4, 12 values | 4 | 96 |
 
-`al` is the size of the large monomers, `sig2` in the inputs. phi_c is
-the nominal volume fraction of crowders, N_c (pi / 6) a_c^3 divided by
-the volume of the cube.
+`al` is the size of the large monomers, `sig2` in the inputs. $\phi_c$ is
+the nominal volume fraction of crowders, the volume of the crowders
+divided by the volume of the cube,
 
-- **Why.** To find how crowders compact a ring with a few large
-  monomers, and when the large monomers cluster.
-- **How.** The chain is first relaxed alone in the empty cube, with
-  harmonic bonds. The crowders are then added, the bonds become FENE,
-  and the system is equilibrated for 3e6 steps before 1e8 production
-  steps. The potential is WCA.
-- **Result.** The results of the paper. The chain shrinks as phi_c
-  grows; for `al` = 5 and 6 it reaches full compaction, R_g of about
-  0.4 R_g0, in 0.2 <= phi_c <= 0.4, at the phi_c where the large
-  monomers form a cluster.
+$$\phi_c = \frac{N_c (\pi / 6) a_c^3}{(2 l)^3}.$$
+
+Here $N_c$ is the number of crowders (`n_crowd`), $a_c$ their size
+(`sig3`), and $2 l$ the edge of the cube, with $l$ the `l` of the
+inputs.
 
 ## LAMMPS inputs
 
 A ring of `n_small` small monomers (size 1, mass 1) and `n_big` large
 monomers (size `sig2`, mass `mass2`) among `n_crowd` crowders (size `sig3`,
 mass 1), in a periodic cube of edge `2 l`. Lennard-Jones units; every
-particle feels a Langevin thermostat at T = 1 with damping time 10.
+particle feels a Langevin thermostat at $T = 1$ with damping time 10.
 
 ```text
 lammps/
@@ -75,12 +70,17 @@ Each input is one whole file with no `include`. A value that is the same
 for every run is written in the inputs; only the run's sweep row comes
 from `study.conf`.
 
-- **Pair potential.** `lj/cut` with U(r) = 4 epsilon [(sigma/r)^12 -
-  (sigma/r)^6], epsilon = 1, cut at 2^(1/6) sigma_ij and not shifted. The
-  cutoff at the minimum of U leaves only the repulsive part, so the
-  forces are those of the Weeks-Chandler-Andersen potential. Without the
-  shift, the reported energies are lower than the WCA energies by epsilon
-  per pair inside the cutoff; the forces are the same.
+- **Pair potential.** `lj/cut` with
+  $U_{ij}(r) = 4 \epsilon [(\sigma_{ij} / r)^{12} - (\sigma_{ij} / r)^{6}]$
+  for two particles of types $i$ and $j$ at distance $r$, where
+  $\sigma_{ij} = (\sigma_i + \sigma_j) / 2$ is the mean of their sizes
+  and $\epsilon = 1$. Type 1 is a small monomer, type 2 a large monomer,
+  and type 3 a crowder. The potential is cut at $2^{1/6} \sigma_{ij}$ and
+  not shifted. The cutoff at the minimum of $U_{ij}$ leaves only the
+  repulsive part, so the forces are those of the Weeks-Chandler-Andersen
+  (WCA) potential. Without the shift, the reported energies are lower
+  than the WCA energies by $\epsilon$ per pair inside the cutoff; the
+  forces are the same.
 - **Relaxation and equilibration.** The chain is relaxed alone, in the
   empty cube of the run, before the crowders are added. With the
   crowders and FENE bonds, the equilibration is 1e6 steps with
