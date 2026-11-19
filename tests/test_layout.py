@@ -1,5 +1,6 @@
 """Checks of the repository's own layout."""
 import importlib
+import re
 import tomllib
 from pathlib import Path
 
@@ -14,6 +15,9 @@ STUDY_RUN_PARTS = (
     "notebooks",
     "runs/manifest.csv",
 )
+README_SECTIONS = ("Paper", "Parts")
+README_RUN_SECTIONS = (
+    "The runs", "LAMMPS inputs", "Checked against the runs")
 
 
 def _studies() -> list[Path]:
@@ -49,6 +53,36 @@ def test_every_study_has_its_run_parts() -> None:
     """Each study folder holds a variant folder with its ``study.conf`` and
     production input, and its SLURM, notebook, and run parts."""
     assert _missing(STUDY_RUN_PARTS) == []
+
+
+def _sections(readme: Path) -> list[str]:
+    """Return the second-level headings of a README, in order, without
+    the lines of its code blocks."""
+    prose = re.sub(r"^```.*?^```", "", readme.read_text(),
+                   flags=re.MULTILINE | re.DOTALL)
+    return re.findall(r"^## (.+)$", prose, re.MULTILINE)
+
+
+def test_every_study_readme_has_the_standard_sections() -> None:
+    """Each study README has the sections that ``projects/README.md``
+    sets, in its order: all of them once the study has a variant folder,
+    and the first two before that."""
+    wrong = []
+    for study in _studies():
+        expected = list(README_SECTIONS)
+        if any(study.glob("lammps/*/study.conf")):
+            expected += README_RUN_SECTIONS
+        if _sections(study / "README.md") != expected:
+            wrong.append(study.name)
+    assert wrong == []
+
+
+def test_standard_names_every_study_readme_section() -> None:
+    """``projects/README.md`` lists each section that the layout check
+    expects of a study README, in the same order."""
+    standard = (ROOT / "projects" / "README.md").read_text()
+    listed = re.findall(r"^\| `## (.+?)` \|", standard, re.MULTILINE)
+    assert listed == [*README_SECTIONS, *README_RUN_SECTIONS]
 
 
 def test_every_study_is_a_listed_package() -> None:

@@ -49,7 +49,8 @@ study means adding its package and its folder to `pyproject.toml`.
   `include`, and its `study.conf`. A value that is the same for every run
   of the variant is written in the inputs; only a run's sweep row comes
   from `study.conf`. The start configuration, in `lammps/start/`, is
-  shared. The study's `README.md` says what the inputs simulate.
+  shared. The study's `README.md` says what the inputs simulate, in the
+  sections that `projects/README.md` sets.
 - **Describe files as they stand.** Do not write where a file came from
   or what it replaced.
 - **Only published studies.** Name no unpublished study, in a file, a

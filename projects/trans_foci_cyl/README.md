@@ -1,6 +1,7 @@
 # TransFociCyl
 
-A ring of small and large monomers among crowders in a cylinder that is periodic along its axis.
+A ring of small and large monomers among crowders in a cylinder that is
+periodic along its axis.
 
 ## Paper
 
@@ -52,11 +53,12 @@ $D = 20$.
 
 ## LAMMPS inputs
 
-A ring of `n_small` small monomers (size 1, mass 1) and `n_big` large
-monomers (size `sig2`, mass `mass2`) among `n_crowd` crowders (size `sig3`,
-mass 1), in a cylinder of radius `r` around the $z$ axis, periodic along
-$z$ with period 2 `lz`. Lennard-Jones units; every particle feels a
-Langevin thermostat at $T = 1$ with damping time 10.
+A ring of `n_small` small monomers (type 1, size 1, mass 1) and `n_big`
+large monomers (type 2, size `sig2`, mass `mass2`) among `n_crowd`
+crowders (type 3, size `sig3`, mass 1), in a cylinder of radius `r`
+around the $z$ axis, periodic along $z$ with period 2 `lz`.
+Lennard-Jones units; every particle feels a Langevin thermostat at
+$T = 1$ with damping time 10.
 
 ```text
 lammps/
@@ -74,90 +76,46 @@ lammps/
 | `start/minimized.initial.config.data` | the relaxed chain that the crowded runs with `al` = 1 share |
 | `start/minimize.lmp` | makes that relaxed chain from the start configuration; every value is written in it |
 
-Each input is one whole file with no `include`. A value that is the same
-for every run of a variant is written in its inputs; only the run's sweep
-row comes from `study.conf`. So the sweep of `wca` has five columns that
-the sweep of `wca_short_equilibration` does not: there, the neighbor
-style and skin, the relaxation length, the first equilibration timestep,
-and the restart period are the same for every run.
+What the inputs of every study share is in
+[`projects/README.md`](../README.md): one whole file per input, the run
+folder, how to shorten a run, and what a restart file holds.
 
 - **Pair potential.** `lj/cut` with
   $U_{ij}(r) = 4 \epsilon [(\sigma_{ij} / r)^{12} - (\sigma_{ij} / r)^{6}]$
-  for two particles of types $i$ and $j$ at distance $r$, where
-  $\sigma_{ij} = (\sigma_i + \sigma_j) / 2$ is the mean of their sizes
-  and $\epsilon = 1$. Type 1 is a small monomer, type 2 a large monomer,
-  and type 3 a crowder. The potential is cut at $2^{1/6} \sigma_{ij}$ and
-  not shifted. The cutoff at the minimum of $U_{ij}$ leaves only the
-  repulsive part, so the forces are those of the Weeks-Chandler-Andersen
-  (WCA) potential. Without the shift, the reported energies are lower
-  than the WCA energies by $\epsilon$ per pair inside the cutoff; the
-  forces are the same.
-- **Wall.** `fix wall/region` with the `lj126` potential on the cylinder
-  of radius `r`: each species is repelled with its own size (1 for the
-  small monomers, $\sigma_{12}$ for the large ones, $\sigma_{13}$ for
-  the crowders), cut at $2^{1/6}$ times that size. The strength is
-  `epsilon_small` for the small monomers, `epsilon_big` for the large
-  ones, and 1 for the crowders. The chain's center of mass is kept at
-  $z = 0$.
-- **Relaxation.** The chain is relaxed alone, in the empty cylinder of
-  the run, before the crowders are added, for `relax_steps` steps (1e5,
-  or 2e5 for `al` = 6). The crowded runs with `al` = 1 do not relax their
-  own chain: their sweep rows have `relax_steps` `shared`, and each run
+  for particles of types $i$ and $j$ at distance $r$, with $\epsilon = 1$
+  and $\sigma_{ij} = (\sigma_i + \sigma_j) / 2$ the mean of their sizes.
+  It is cut at its minimum, $2^{1/6} \sigma_{ij}$, and not shifted: the
+  forces are those of the Weeks-Chandler-Andersen (WCA) potential, and
+  the reported energies are lower than the WCA energies by $\epsilon$
+  per pair inside the cutoff.
+- **Wall.** `fix wall/region` with the `lj126` potential on the
+  cylinder: the small monomers, the large monomers, and the crowders are
+  repelled with sizes 1, $\sigma_{12}$, and $\sigma_{13}$ and strengths
+  `epsilon_small`, `epsilon_big`, and 1, each cut at $2^{1/6}$ times its
+  size. The chain's center of mass is kept at $z = 0$.
+- **The variants.** Both relax the chain alone, then add the crowders
+  and equilibrate. `wca` equilibrates in two stages, 1e6 steps with
+  displacements capped and 4e6 plain steps; `wca_short_equilibration`
+  runs the capped stage only.
+- **The sweep rows.** Besides the state point, a row of `wca` sets the
+  neighbor style (`bin` or `multi`) and skin, the relaxation length
+  (`relax_steps`), the timestep of the capped stage (`eq1_dt`), and the
+  restart period (`restart_every`); in `wca_short_equilibration` these
+  are the same for every run and written in its inputs. A row of either
+  variant sets the processor grid across the cylinder (`grid_x`,
+  `grid_y`): 1 by 1 below 25,000 particles and 2 by 2 from there on. The
+  neighbor settings and the grid change speed, not physics.
+- **The shared chain.** The crowded runs with `al` = 1 do not relax
+  their own chain: their rows have `relax_steps` `shared`, and each run
   folder gets `start/minimized.initial.config.data`, which
-  `start/minimize.lmp` made once, with seed 1 and 1e5 steps.
-- **Equilibration.** With the crowders and FENE bonds, `wca` runs 1e6
-  steps with displacements capped at 0.01, at the timestep of the run's
-  row (`eq1_dt`, 0.02 or 0.01), then 4e6 plain steps (dt 0.01).
-  `wca_short_equilibration` runs the capped stage only, at dt 0.01, and
-  goes on to production.
-- **Neighbor lists and processor grid.** These change speed, not
-  physics. In `wca` each sweep row names its neighbor style (`bin` or
-  `multi`); the input sets up `multi` lists with an `if` command that
-  compares two words, which the documentation of LAMMPS 29 Sep 2021, the
-  version of the runs, describes (`if` command).
-  `wca_short_equilibration` and every `minimize.lmp` use `multi` lists.
-  The skin is 0.3 everywhere. `production.lmp` splits the cylinder among
-  the cores with `processors grid_x grid_y *`, from the run's row: 1 by 1
-  across the cylinder below 25,000 particles and 2 by 2 from there on,
-  with any number of domains along the axis. `minimize.lmp` has no
-  `processors` command: the relaxation runs on one core.
-- **Restart files.** Production writes one every `restart_every` steps:
-  per sweep row in `wca` (1e6 or 5e6), 1e6 in `wca_short_equilibration`.
-  No run of this study was finished from a restart file, so there is no
-  restart input.
+  `start/minimize.lmp` made once, in place of `minimize.lmp` and the
+  start file.
+- **One core for the relaxation.** `minimize.lmp` has no `processors`
+  command.
+- **No restart input.** No run of this study was finished from a restart
+  file.
 
-### The run folder
-
-The sweep generator makes one folder per run, named after the run
-(`runs/manifest.csv`, column `run_name`), with:
-
-- `input.lmp`: `production.lmp` with the run's sweep row written as
-  `variable` lines at its top. The production loop jumps back into the
-  file by this name.
-- `minimize_initial_config.lmp`: `minimize.lmp`, the same way, and the
-  start file under its own name; or, for a row with `relax_steps`
-  `shared`, `minimized.initial.config.data` from `start/`.
-- an empty `restarts/` folder.
-
-The variables each input reads from the sweep row are listed at its top.
-
-### Run lengths
-
-Every step count is an `index` variable whose value is the production
-one: `relax_steps` in `minimize.lmp`; `eq1_steps`, `eq2_steps` (in `wca`
-only), `n_loops`, `loop_steps`, and `restart_every` in `production.lmp`.
-LAMMPS never redefines an `index` variable, so the first definition wins:
-the value on the command line (LAMMPS documentation, command-line option
-`-var`), then the one the generator writes at the top of the input
-(`relax_steps` and `restart_every` of the sweep row, in `wca`), then the
-input's own. For example:
-
-    lmp -in input.lmp -var eq1_steps 2000 -var n_loops 10 -var loop_steps 1000
-
-The loop pads `j` to the width of `n_loops`: with 20 loops the
-all-particle files are numbered `j01`, `j02`, ..., `j20`.
-
-### Checked against the runs
+## Checked against the runs
 
 With variables substituted and evaluated as LAMMPS does, the inputs were
 compared, command for command and in order, with the commands that the
@@ -176,6 +134,10 @@ runs' logs echo.
   the relaxation needs only one core.
 - **`start/minimize.lmp`** gives the commands of the log of the
   relaxation that made `start/minimized.initial.config.data`.
+- **The `if` command** that sets up `multi` lists in `production.lmp`
+  of `wca` is not in the runs' inputs, which each set one neighbor
+  style. It compares two words, as the documentation of LAMMPS
+  29 Sep 2021, the version of the runs, describes (`if` command).
 - **The manifest.** Every value in `runs/manifest.csv` except
   `relax_steps` equals what the run's log echoes, for all 424 runs.
   `relax_steps` was read from the relaxation inputs.
