@@ -308,6 +308,7 @@ message's subject and body.
 | `open-issue`        | Asked to file or revise an issue                                     |
 | `post-comment`      | Asked to reply to or comment on an issue or pull request             |
 | `write-test`        | Adding or changing a test                                            |
+| `check-study`       | A study's `lammps/`, manifest, or README is added or changed         |
 | `close-out`         | A pull request merged; cleaning up its branch and files              |
 
 Load a task's skill before you start it. Changing a skill means checking
