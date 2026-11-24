@@ -112,7 +112,7 @@ records the checks or human review applied to each part:
 
 | Part                                                            | Tier       | Checks or human review                                                                                               |
 | --------------------------------------------------------------- | ---------- | -------------------------------------------------------------------------------------------------------------------- |
-| `projects/<study>/lammps/`, `projects/<study>/runs/`            | Supervised | CI: the template checks; each input compared with the published runs, as its study README says; every line reviewed  |
+| `projects/<study>/lammps/`, `projects/<study>/runs/`            | Supervised | CI: the template checks; maintainer review of every line                                                             |
 | `projects/<study>/python/`, `tests/`, `tools/`, `polyphys_lab/` | Supervised | CI: flake8, mypy, pytest on Python 3.14, and the tests against PolyPhys `main`; maintainer review of every line      |
 | `pipeline/`, `projects/<study>/slurm/`, `config/`               | Supervised | CI: ShellCheck; no script yet, and nothing run on a cluster; maintainer review of every line                         |
 | `notebooks/`, `projects/<study>/notebooks/`                     | Supervised | No notebook yet; maintainer review of every line                                                                     |
