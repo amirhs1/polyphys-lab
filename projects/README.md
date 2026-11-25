@@ -57,8 +57,7 @@ order:
 | `## Paper` | the citation, and which of the paper's simulations are the runs here |
 | `## Parts` | a table of the study's parts and their state, and how the package imports |
 | `## The runs` | how many runs and variants there are; a table with one row per variant and group of state points; the definition of each symbol in the table |
-| `## LAMMPS inputs` | the system and its units, in one paragraph; the tree of `lammps/`; a table of what each file does; each potential, in a sentence or two with its formula; what differs between the variants and between the sweep rows |
-| `## Checked against the runs` | what was compared with the published runs and with how many of them, what differs on purpose, and what was not checked |
+| `## LAMMPS inputs` | the system and its units, in one paragraph; the tree of `lammps/`; a table of what each file does; each potential, in a sentence or two with its formula; what differs between the variants and between the sweep rows; last, a list of where the inputs differ from what ran |
 
 A study whose LAMMPS inputs are not written yet has the first three.
 `tests/test_layout.py` checks the headings and their order.

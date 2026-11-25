@@ -115,34 +115,18 @@ folder, how to shorten a run, and what a restart file holds.
 - **No restart input.** No run of this study was finished from a restart
   file.
 
-## Checked against the runs
+Where the inputs differ from what ran:
 
-With variables substituted and evaluated as LAMMPS does, the inputs were
-compared, command for command and in order, with the commands that the
-runs' logs echo.
-
-- **`production.lmp`** gives the commands of the log of every one of the
-  424 runs, from its manifest row. One name differs: the inputs here call
-  the crowders' wall fix `F_wall_crowd`.
-- **`minimize.lmp`** gives the commands of the relaxation logs of the
-  nine runs whose relaxation log was at hand, one or two per `al`, but
-  for one command: the runs' inputs had `processors 1 1 *`, which the
-  inputs here leave out. The runs read the start file under the name
-  `initial_config.data`; the inputs here read it under its own name. In
-  the crowded runs with `al` = 3 and 5 the relaxation ran in the
-  production job, on its cores; that arrangement was abandoned, since
-  the relaxation needs only one core.
-- **`start/minimize.lmp`** gives the commands of the log of the
-  relaxation that made `start/minimized.initial.config.data`.
+- **The crowders' wall fix.** The inputs call it `F_wall_crowd`; the
+  runs' inputs gave it another ID.
+- **The relaxation's processor grid.** The runs' relaxation inputs had
+  `processors 1 1 *`, which `minimize.lmp` leaves out.
+- **The start file.** The runs read it under the name
+  `initial_config.data`; the inputs read it under its own name.
+- **Where the relaxation runs.** In the crowded runs with `al` = 3 and 5
+  the relaxation ran in the production job, on its cores; here it runs
+  on one core.
 - **The `if` command** that sets up `multi` lists in `production.lmp`
   of `wca` is not in the runs' inputs, which each set one neighbor
   style. It compares two words, as the documentation of LAMMPS
   29 Sep 2021, the version of the runs, describes (`if` command).
-- **The manifest.** Every value in `runs/manifest.csv` except
-  `relax_steps` equals what the run's log echoes, for all 424 runs.
-  `relax_steps` was read from the relaxation inputs.
-
-Short runs of every input complete with LAMMPS 30 Sep 2026 - Update 1, a
-stock build: `production.lmp` with `bin` and with `multi` lists, on one
-and on four cores, and each `minimize.lmp` on one core. No input was run
-with the LAMMPS version of the runs.

@@ -16,8 +16,7 @@ STUDY_RUN_PARTS = (
     "runs/manifest.csv",
 )
 README_SECTIONS = ("Paper", "Parts")
-README_RUN_SECTIONS = (
-    "The runs", "LAMMPS inputs", "Checked against the runs")
+README_RUN_SECTIONS = ("The runs", "LAMMPS inputs")
 
 
 def _studies() -> list[Path]:

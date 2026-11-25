@@ -85,29 +85,20 @@ folder, how to shorten a run, and what a restart file holds.
 - **One core for the relaxation.** `minimize.lmp` runs on one core, with
   `bin` neighbor lists and a skin of 1 in every run.
 
-## Checked against the runs
+Where the inputs differ from what ran:
 
-With variables substituted, the inputs were compared, command for
-command, with the inputs of 18 runs.
-
-- **`production.lmp`** gives 14 of the inputs exactly; the other four
-  write a restart file every 5e6 steps instead of 1e6.
-- **`minimize.lmp`** gives 14 exactly; the other four use other neighbor
-  settings (`multi` lists, or a skin of 0.3).
-- **The start file**: the runs read it under the name
-  `initial_config.data`; the inputs here read it under its own name.
-- **`restart.lmp`**: not matched yet. The four restart inputs compared
-  set the loop count and the last loop's length as numbers, and three of
-  them set no thermo output period.
+- **The start file.** The runs read it under the name
+  `initial_config.data`; the inputs read it under its own name.
+- **The restart period.** `production.lmp` writes a restart file every
+  1e6 steps (`restart_every`); some runs wrote one every 5e6.
+- **The relaxation's neighbor settings.** Some runs relaxed the ring with
+  `multi` lists or a skin of 0.3; `minimize.lmp` uses `bin` lists and a
+  skin of 1.
 - **The `if` command** that sets up `multi` lists is not in the runs'
   inputs, which each set one neighbor style. It compares two words, as
   the documentation of LAMMPS 29 Sep 2021, the version of the runs,
   describes (`if` command).
-
-Every value in `runs/manifest.csv` except `relax_steps` equals what the
-run's log echoes, for all 384 runs. `relax_steps` was read from the
-relaxation inputs of the 18 runs.
-
-Short runs with `bin` and with `multi` lists, and of `restart.lmp`,
-complete with LAMMPS 30 Sep 2026, a stock build. No input was run with
-the LAMMPS version of the runs.
+- **`restart.lmp`** is written for the restart stage. It takes the loop
+  count and the last loop's length as variables (`nloop`,
+  `last_loop_steps`) where the runs' restart inputs had numbers, and it
+  sets a thermo output period, which some of those did not.

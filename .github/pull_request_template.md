@@ -43,7 +43,7 @@ for anything not checked, and why.
 ## Scientific correctness
 
 - [ ] No physical or numerical setting of an input changed, or the change is explained above with its scientific basis
-- [ ] The inputs still give the commands of the published runs, or the difference is stated in the study's README, "Checked against the runs"
+- [ ] The inputs still give the commands of the published runs, or the difference is in the list at the end of the study README's "LAMMPS inputs"
 - [ ] Nothing here was run on a cluster, or what was run is stated above
 
 ## Decisions and risks
