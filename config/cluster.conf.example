@@ -1,3 +1,5 @@
+# shellcheck shell=bash
+# shellcheck disable=SC2034  # read by the pipeline stages that source it
 # Site settings for the pipeline.
 #
 # Copy this file to `cluster.conf` in the same folder and fill it in:
@@ -5,20 +7,21 @@
 #     cp cluster.conf.example cluster.conf
 #
 # `cluster.conf` is ignored by git and must never be committed. It is the
-# one place where account names, addresses, and storage paths live. A
-# stage that needs a value sources it and fails with a clear message when
-# the file or the value is missing.
+# one place where storage paths and other site values live. A stage reads
+# it with `lab_load_cluster_conf` (pipeline/lib/common.sh) and names the
+# values it needs; a missing file, a syntax error, or a value that is
+# unset, empty, or still CHANGE_ME stops the stage with a message. To read
+# a file at another path, set LAB_CLUSTER_CONF to it.
 
 # --- SLURM identity ---------------------------------------------------
-# No job script carries `#SBATCH --account=` or `--mail-user=`.
-# Preferred: export SBATCH_ACCOUNT in your shell profile on the cluster;
-# sbatch reads it as the default account. With no --mail-user, SLURM
-# notifies the submitting user.
+# No job script carries `#SBATCH --account=` or `--mail-user=`, and no
+# stage passes either. Export SBATCH_ACCOUNT in your shell profile on the
+# cluster; sbatch reads it as the default account. With no --mail-user,
+# SLURM notifies the submitting user.
 #
-# Set the two values below only if you submit through a wrapper that
-# passes them on the command line.
-SLURM_ACCOUNT=""
-SLURM_MAIL_USER=""
+# Not read by any stage. Kept for one case: if that mail does not arrive,
+# a submit wrapper may pass this address as --mail-user.
+# SLURM_MAIL_USER=""
 
 # --- Storage ----------------------------------------------------------
 # Where the simulations run and where finished data is kept.
@@ -26,10 +29,10 @@ SCRATCH_DIR="${HOME}/scratch"
 PROJECT_DIR="${HOME}/CHANGE_ME"
 
 # --- Software ---------------------------------------------------------
-# The Python environment that has `polyphys_lab` installed, and the
-# modules a LAMMPS job loads. Leave empty to use what is already active.
+# The Python environment that has `polyphys_lab` installed. Leave empty
+# to use what is already active. The modules a LAMMPS run loads are its
+# variant's MODULES, in study.conf.
 LAB_PYTHON_ENV=""
-LAMMPS_MODULES=""
 
 # --- This repository --------------------------------------------------
 # Where polyphys-lab is cloned on the cluster. A study kept in another

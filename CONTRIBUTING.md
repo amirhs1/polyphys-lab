@@ -40,10 +40,12 @@ Run these from the repository root before opening a pull request:
 | Lint Python | `python -m flake8 polyphys_lab projects tests tools` |
 | Type-check  | `python tools/typecheck.py`                          |
 | Lint shell  | `git ls-files '*.sh' \| xargs shellcheck`            |
+| Shell tests | `bash pipeline/tests/run_tests.sh`                   |
 
-CI runs the shell lint, the Python lint, the type-check, and the tests on
-every pull request, and a further job that runs the tests against PolyPhys
-`main` without blocking a merge.
+CI runs the shell lint and the shell tests, in the "Lint shell" job, and
+the Python lint, the type-check, and the tests on every pull request, and a
+further job that runs the tests against PolyPhys `main` without blocking a
+merge.
 
 ## Submitting a pull request
 
