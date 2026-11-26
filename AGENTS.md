@@ -22,8 +22,8 @@ message.
 | Lint Python          | `python -m flake8 polyphys_lab projects tests tools` |
 | Type-check           | `python tools/typecheck.py`                          |
 | Lint shell           | `git ls-files '*.sh' \| xargs shellcheck`            |
-| Shell tests          | `bash pipeline/tests/run_tests.sh`, once it exists   |
-| Full pre-commit gate | All tests, lint Python, type-check, and lint shell   |
+| Shell tests          | `bash pipeline/tests/run_tests.sh`                   |
+| Full pre-commit gate | All tests, shell tests, lint Python, type-check, and lint shell |
 
 Run the full gate before calling a change complete, and report the actual
 output, not the expected output. Do not describe a change as working because
