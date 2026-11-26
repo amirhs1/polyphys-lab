@@ -1,0 +1,6 @@
+# ShellCheck settings for every shell file in this repository.
+# A `# shellcheck source=` path is read relative to the script that holds
+# it, and ShellCheck follows it without `-x`, so the stages that source
+# pipeline/lib/common.sh are checked against it.
+source-path=SCRIPTDIR
+external-sources=true

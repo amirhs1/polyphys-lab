@@ -27,6 +27,9 @@ jobs:
       - name: Run ShellCheck
         run: git ls-files '*.sh' | xargs --no-run-if-empty shellcheck
 
+      - name: Run shell tests
+        run: bash pipeline/tests/run_tests.sh
+
   python:
     name: Lint and test Python
     runs-on: ubuntu-24.04

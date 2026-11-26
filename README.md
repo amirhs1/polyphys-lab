@@ -19,7 +19,9 @@ from here yet.
 - `projects/trans_foci_cub/` and `projects/trans_foci_cyl/` hold their LAMMPS
   inputs, parsers, and specs. `projects/hns_cub/` holds its parser and
   specs only.
-- Each stage in `pipeline/` has a `README.md` and no script yet.
+- `pipeline/lib/` holds the shell functions the stages share, and
+  `pipeline/tests/` their shell tests. Each stage's `README.md` says
+  whether its script is written.
 - No study has its `slurm/` or `notebooks/` folder yet.
 
 Read the inputs as a record of what the published runs simulated, not as a
@@ -80,6 +82,7 @@ python -m pytest
 python -m flake8 polyphys_lab projects tests tools
 python tools/typecheck.py
 git ls-files '*.sh' | xargs shellcheck
+bash pipeline/tests/run_tests.sh
 ```
 
 The tests marked `private_data` compare with the maintainer's processed
@@ -114,7 +117,7 @@ records the checks or human review applied to each part:
 | --------------------------------------------------------------- | ---------- | -------------------------------------------------------------------------------------------------------------------- |
 | `projects/<study>/lammps/`, `projects/<study>/runs/`            | Supervised | CI: the template checks; maintainer review of every line                                                             |
 | `projects/<study>/python/`, `tests/`, `tools/`, `polyphys_lab/` | Supervised | CI: flake8, mypy, pytest on Python 3.14, and the tests against PolyPhys `main`; maintainer review of every line      |
-| `pipeline/`, `projects/<study>/slurm/`, `config/`               | Supervised | CI: ShellCheck; no script yet, and nothing run on a cluster; maintainer review of every line                         |
+| `pipeline/`, `projects/<study>/slurm/`, `config/`               | Supervised | CI: ShellCheck and shell tests; no stage script yet, and nothing run on a cluster; maintainer review of every line   |
 | `notebooks/`, `projects/<study>/notebooks/`                     | Supervised | No notebook yet; maintainer review of every line                                                                     |
 | `.github/workflows/`, `pyproject.toml`                          | Supervised | CI on every pull request; maintainer review of every line                                                            |
 
