@@ -1,0 +1,108 @@
+# HnsCub, variant wca_patch: relaxation of the DNA ring alone, before the
+# H-NS proteins and the crowders are added. Every run relaxes its own ring
+# with this input, in a job of its own on one core. The ring is read from
+# the start configuration into the cube of the run, and runs relax1_steps
+# steps (1e5) with displacements capped, then relax2_steps steps (5e6) of
+# plain integration, both with a Langevin thermostat. The result,
+# minimized.dna.data, is what production.lmp reads.
+#
+# The run's folder holds this file as minimize_initial_config.lmp and the
+# start configuration, dna.data, from ../start/. The sweep generator
+# writes the run's variables at the top of the file, from its row of
+# SWEEP in study.conf; this input reads kBend11, l, i, and randseed.
+#
+# Atom types: 1 DNA monomer (the only one here).
+
+#---------- Run lengths ----------
+# Index variables holding the production values. A test shortens them
+# with -var on the command line (for example -var relax2_steps 1000);
+# LAMMPS never redefines an index variable.
+variable relax1_steps index 100000
+variable relax2_steps index 5000000
+
+#---------- Sizes, cutoff, and bond constants ----------
+# ljRcut = 2^(1/6), rounded at the sixth decimal place.
+variable ljRcut equal 1.122462
+variable sig1 equal 1.0
+variable sig11 equal 0.5*(${sig1}+${sig1})
+variable cutoff11 equal ${sig11}*${ljRcut}
+variable epsilon11 equal 1.0
+# FENE: R0 = 1.5 sigma_11 and K = 30 epsilon_11 / sigma_11^2.
+variable rBondFene11 equal 1.5*${sig11}
+variable kFene11 equal 30*${epsilon11}/(${sig11}^2)
+
+#---------- Initialization ----------
+units lj
+dimension 3
+boundary p p p
+atom_style angle
+
+read_data dna.data nocoeff
+
+#---------- Neighbor lists ----------
+# bin lists with a skin of 2.
+variable vskin equal 2
+neighbor ${vskin} bin
+neigh_modify delay 0 every 1 check yes
+
+#---------- Cube ----------
+# The periodic cube of side 2 l, centered at the origin.
+change_box all x final -${l} ${l} y final -${l} ${l} z final -${l} ${l} &
+    boundary p p p units box
+region cube block INF INF INF INF INF INF units box
+
+mass 1 1.0
+group dna type 1
+
+#---------- Pair potential ----------
+# lj/cut with epsilon_11 = 1 and sigma_11 = 1, cut at its minimum,
+# 2^(1/6) sigma_11, and shifted to zero there: the Weeks-Chandler-Andersen
+# potential.
+pair_style lj/cut ${ljRcut}
+pair_modify shift yes
+pair_coeff 1 1 ${epsilon11} ${sig11} ${cutoff11}
+
+#---------- FENE bonds along the ring ----------
+# special_bonds fene turns the pair potential off between bonded monomers;
+# the FENE bond carries its own repulsion. Bond type 2 is not used here.
+bond_style hybrid fene harmonic
+special_bonds fene
+bond_coeff 1 fene ${kFene11} ${rBondFene11} ${epsilon11} ${sig11}
+
+#---------- Bending ----------
+# U = K (theta - 180)^2 with K = kBend11 / 2: LAMMPS's harmonic angle has
+# no factor 1/2, so the bending rigidity of the row, kBend11, is halved.
+angle_style harmonic
+variable kBend11Lammps equal 0.5*${kBend11}
+angle_coeff 1 ${kBend11Lammps} 180.0
+
+#---------- Relaxation, stage 1 ----------
+# T = 1, damping time 1; displacements capped at 0.01 per step. The ring's
+# center of mass is kept at the origin.
+fix F_langevin all langevin 1 1 1 ${randseed} tally yes
+fix F_nve all nve/limit 0.01
+fix F_recenter dna recenter 0.0 0.0 0.0 shift all units box
+thermo 10000
+thermo_style custom step ke pe etail ecouple econserve evdwl ebond eangle &
+    emol temp press
+timestep 0.01
+run ${relax1_steps}
+
+unfix F_langevin
+unfix F_nve
+unfix F_recenter
+
+#---------- Relaxation, stage 2 ----------
+# Plain integration with the same thermostat and timestep.
+fix F_langevin all langevin 1 1 1 ${randseed} tally yes
+fix F_nve all nve
+fix F_recenter dna recenter 0.0 0.0 0.0 shift all units box
+timestep 0.01
+run ${relax2_steps}
+
+write_restart ./restart.before.i${i}.part1.dna
+write_data minimized.dna.data pair ij
+
+unfix F_langevin
+unfix F_nve
+unfix F_recenter
