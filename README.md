@@ -16,9 +16,8 @@ this repository.
 This repository is being built, and nothing in it has been run on a cluster
 from here yet.
 
-- `projects/trans_foci_cub/` and `projects/trans_foci_cyl/` hold their LAMMPS
-  inputs, parsers, and specs. `projects/hns_cub/` holds its parser and
-  specs only.
+- `projects/trans_foci_cub/`, `projects/trans_foci_cyl/`, and
+  `projects/hns_cub/` hold their LAMMPS inputs, parsers, and specs.
 - `pipeline/lib/` holds the shell functions the stages share, and
   `pipeline/tests/` their shell tests. Each stage's `README.md` says
   whether its script is written.
