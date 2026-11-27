@@ -57,10 +57,10 @@ class HnsCub(ParserBase):
         Strength of the attractive LJ interaction between the H-NS poles and
         the monomers, fixed at 29; not in the name.
     eps_hc : float
-        Value of the keyword ``epshc``, named for the strength of the LJ
-        interaction between the H-NS cores and the crowders. The project's
-        LAMMPS inputs do not read it: they fix that strength at 1 with a
-        purely repulsive cutoff.
+        Strength of the LJ interaction between the H-NS cores and the
+        crowders, 0 or 1 in the runs; keyword ``epshc``. The pair is cut
+        at the potential's minimum, so it only repels, and with 0 the
+        cores and the crowders do not interact.
     lcube : float
         Side of the cube, :math:`L = 2 l`, from the half-side :math:`l`
         (keyword ``l``).
