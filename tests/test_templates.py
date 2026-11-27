@@ -115,18 +115,26 @@ def _first_input(variant: Path) -> Path:
 
 def _run_name(variant: Path) -> str:
     """Return the name that a variant's ``production.lmp`` gives a run,
-    with its variables not yet substituted: the name of the chain's dump
-    file before ``.bug.lammpstrj``, with ``run_name`` written out."""
-    text = (variant / "production.lmp").read_text()
-    name = _value(
-        text, r"^\s*dump\s+\S+\s+bug\s+atom\s+\S+\s+(\S+)\.bug\.lammpstrj")
-    run_name = _value(text, r"^\s*variable\s+run_name\s+string\s+(\S+)")
-    return name.replace("${run_name}", run_name)
+    with the sweep row's variables not yet substituted: the name of the
+    one dump file ``<name>.<group>.lammpstrj`` whose ``<group>`` is the
+    dump's own group, before that suffix, with the input's ``string``
+    variables written out."""
+    code = _code((variant / "production.lmp").read_text())
+    dumps = re.findall(
+        r"^\s*dump\s+\S+\s+(\w+)\s+atom\s+\S+\s+(\S+)\.\1\.lammpstrj\s*$",
+        code, re.MULTILINE)
+    assert len(dumps) == 1, dumps
+    [(_, name)] = dumps
+    strings = dict(re.findall(r"^\s*variable\s+(\w+)\s+string\s+(\S+)",
+                              code, re.MULTILINE))
+    return re.sub(r"\$\{(\w+)\}",
+                  lambda m: strings.get(m.group(1), m.group(0)), name)
 
 
-def _written_in_inputs(variant: Path) -> dict[str, str]:
+def _written_in_inputs(variant: Path, columns: list[str]) -> dict[str, str]:
     """Return the settings that a variant's inputs write themselves: the
-    manifest columns of this kind that its sweep does not carry."""
+    manifest columns among `columns` that its sweep does not carry and
+    that a rule here reads from its inputs."""
     production = (variant / "production.lmp").read_text()
     minimize = _first_input(variant).read_text()
     patterns = {
@@ -141,7 +149,7 @@ def _written_in_inputs(variant: Path) -> dict[str, str]:
     }
     return {name: _value(text, pattern)
             for name, (text, pattern) in patterns.items()
-            if name not in _columns(variant)}
+            if name in columns and name not in _columns(variant)}
 
 
 @pytest.fixture
@@ -264,13 +272,14 @@ def test_manifest_is_the_expanded_sweeps(
         study: Path, generator_names: dict[str, str]) -> None:
     """A manifest lists each variant's sweep rows once per replicate, under
     the name that ``production.lmp`` gives the run, with the seed
-    ``seed_group + ens``, the row's own settings, and, for a setting the
-    sweep does not carry, the value the variant's inputs write."""
+    ``seed_group + ens``, the row's own settings, and, for a manifest
+    column the sweep does not carry, the value the variant's inputs
+    write."""
     manifest = _manifest(study)
     expected = []
     for name in dict.fromkeys(row["variant"] for row in manifest):
         variant = study / "lammps" / name
-        written = _written_in_inputs(variant)
+        written = _written_in_inputs(variant, list(manifest[0]))
         template = _run_name(variant)
         for row in _sweep(variant):
             variables = {generator_names.get(column, column): value
